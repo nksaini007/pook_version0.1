@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 const connectDB = require('./config/db');
-
+const categoryRoutes = require('./routes/categoryRoutes');
 const app = express();
 
 // Middleware
@@ -18,6 +18,10 @@ connectDB();
 // Routes
 const userRoutes = require('./routes/userRoutes');
 const productRoutes = require('./routes/productRoutes'); // ✅ added
+
+//categry routes 
+app.use('/api/categories', categoryRoutes);
+
 
 app.use('/api/users', userRoutes);
 app.use('/api/products', productRoutes); // ✅ added

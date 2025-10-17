@@ -1,7 +1,8 @@
 import React, { useContext, useState } from 'react';
 import { motion } from 'framer-motion';
-import userImg from '../img/city.jpg';
-import adminImg from '../img/220821.gif';
+import userImg from '../img/city.jpg';       // Normal user background
+import adminImg from '../img/220821.gif';    // Admin background
+import sellerImg from '../img/dance.gif';   // Seller background
 import { FaSearch, FaCrown } from "react-icons/fa";
 import { AuthContext } from '../context/AuthContext';
 
@@ -34,7 +35,6 @@ const LandingPage = () => {
   const handleSearch = async (e) => {
     e.preventDefault();
     if (!searchQuery.trim()) return;
-//http://192.168.29.252:5000
 
     setLoading(true);
     setError('');
@@ -52,14 +52,22 @@ const LandingPage = () => {
   };
 
   const isAdmin = user?.role === 'admin';
-  const backgroundImage = isAdmin ? adminImg : userImg;
+  const isSeller = user?.role === 'seller';
+
+  // Background selection based on role
+  let backgroundImage;
+  if (isAdmin) backgroundImage = adminImg;
+  else if (isSeller) backgroundImage = sellerImg;
+  else backgroundImage = userImg;
 
   return (
     <div
       style={{
         ...styles.page,
         background: isAdmin
-          ? `linear-gradient(to bottom right, rgba(10, 10, 10, 0.36), rgba(30,30,30,0.9)), url(${backgroundImage}) center/cover no-repeat`
+          ? `linear-gradient(to bottom right, rgba(10,10,10,0.36), rgba(30,30,30,0.9)), url(${backgroundImage}) center/cover no-repeat`
+          : isSeller
+          ? `linear-gradient(to bottom right, rgba(200,200,255,0.5), rgba(150,150,255,0.6)), url(${backgroundImage}) center/cover no-repeat`
           : `linear-gradient(to bottom right, rgba(255,255,255,0.7), rgba(255,240,220,0.6)), url(${backgroundImage}) center/cover no-repeat`
       }}
     >
@@ -74,10 +82,10 @@ const LandingPage = () => {
         {/* Heading */}
         <motion.h1
           variants={itemVariants}
-          style={isAdmin ? styles.adminHeading : styles.heading}
+          style={isAdmin ? styles.adminHeading : isSeller ? styles.sellerHeading : styles.heading}
         >
           Welcome{" "}
-          <span style={isAdmin ? styles.adminHighlight : styles.highlight}>
+          <span style={isAdmin ? styles.adminHighlight : isSeller ? styles.sellerHighlight : styles.highlight}>
             {user?.name || "Guest"}
           </span>
         </motion.h1>
@@ -85,20 +93,23 @@ const LandingPage = () => {
         {/* Subtext */}
         <motion.p
           variants={itemVariants}
-          style={isAdmin ? styles.adminSubtext : styles.subtext}
+          style={isAdmin ? styles.adminSubtext : isSeller ? styles.sellerSubtext : styles.subtext}
         >
           {isAdmin ? (
             <span className="flex items-center justify-center gap-2">
-              {/* <FaCrown className="text-yellow-400 text-2xl" /> */}
               Admin Dashboard Control Center
+            </span>
+          ) : isSeller ? (
+            <span className="flex items-center justify-center gap-2">
+              Seller Dashboard - Manage Your Products
             </span>
           ) : (
             "Find the best products for your home"
           )}
         </motion.p>
 
-        {/* Non-admin search form */}
-        {!isAdmin && (
+        {/* Non-admin/seller search form */}
+        {!isAdmin && !isSeller && (
           <motion.form
             variants={itemVariants}
             style={styles.searchForm}
@@ -122,11 +133,8 @@ const LandingPage = () => {
           </motion.form>
         )}
 
-        {/* Admin Buttons */}
-        
-
-        {/* Non-admin search results */}
-        {!isAdmin && (
+        {/* Search results for normal users */}
+        {!isAdmin && !isSeller && (
           <div className="mt-6">
             {loading && <p className="text-orange-500 font-medium">Searching...</p>}
             {error && <p className="text-red-500">{error}</p>}
@@ -146,11 +154,7 @@ const LandingPage = () => {
                   >
                     <div className="overflow-hidden rounded-xl mb-3">
                       <img
-                        src={
-                          product.images?.[0]?.url
-                            ? `http://192.168.29.252:5000${product.images[0].url}`
-                            : product.image
-                        }
+                        src={product.images?.[0]?.url ? `http://192.168.29.252:5000${product.images[0].url}` : product.image}
                         alt={product.name}
                         className="w-full h-44 object-cover hover:scale-105 transition-transform duration-300"
                       />
@@ -207,12 +211,24 @@ const styles = {
     textShadow: '0 0 10px rgba(255, 165, 0, 0.8)',
     letterSpacing: '1px'
   },
+  sellerHeading: {
+    fontSize: '3rem',
+    marginBottom: '1rem',
+    fontWeight: 'bold',
+    color: '#ffffff',
+    textShadow: '0 0 10px rgba(0, 150, 255, 0.8)',
+    letterSpacing: '1px'
+  },
   highlight: {
     color: '#ff7a00'
   },
   adminHighlight: {
     color: '#ffae00',
     textShadow: '0 0 20px rgba(255, 150, 0, 0.9)'
+  },
+  sellerHighlight: {
+    color: '#00c3ff',
+    textShadow: '0 0 20px rgba(0, 200, 255, 0.9)'
   },
   subtext: {
     fontSize: '1.25rem',
@@ -222,6 +238,14 @@ const styles = {
   adminSubtext: {
     fontSize: '1.4rem',
     color: '#ffdd99',
+    fontWeight: '600',
+    marginBottom: '2rem',
+    textTransform: 'uppercase',
+    letterSpacing: '1px'
+  },
+  sellerSubtext: {
+    fontSize: '1.3rem',
+    color: '#b3e0ff',
     fontWeight: '600',
     marginBottom: '2rem',
     textTransform: 'uppercase',

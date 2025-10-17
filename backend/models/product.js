@@ -1,14 +1,3 @@
-// const mongoose = require('mongoose');
-
-// const productSchema = new mongoose.Schema({
-//   name: { type: String, required: true },
-//   description: { type: String },
-//   price: { type: Number, required: true },
-//   image: { type: String },
-//   category: { type: String },
-// }, { timestamps: true });
-
-// module.exports = mongoose.model('Product', productSchema);
 const mongoose = require('mongoose');
 
 const reviewSchema = new mongoose.Schema(
@@ -23,6 +12,7 @@ const reviewSchema = new mongoose.Schema(
 
 const productSchema = new mongoose.Schema(
   {
+    // Basic Info
     name: {
       type: String,
       required: [true, 'Please enter product name'],
@@ -42,29 +32,46 @@ const productSchema = new mongoose.Schema(
     category: {
       type: String,
       required: [true, 'Please select category'],
-      enum: ["Kitchen Appliances", "Home Cleaning", "Entertainment"],
+      
     },
-
     subcategory: {
       type: String,
     },
+    type: { type: String }, // e.g., Cotton, Electric
 
+    // Product Details
+    brand: { type: String },
+    material: { type: String },
+    color: { type: String },
+    dimensions: { type: String },
+    weight: { type: String },
+    warranty: { type: String },
+    origin: { type: String },
+
+    features: [{ type: String }], // Array of features
+    care_instructions: { type: String },
+
+    // Images
+    images: [
+      {
+        public_id: { type: String, required: true },
+        url: { type: String, required: true },
+      },
+    ],
+
+    // Stock & Seller
     stock: {
       type: Number,
       required: true,
       default: 0,
     },
-    images: [
-      {
-        public_id: { type: String, required: true },
-        url: { type: String, required: true },
-      }
-    ],
     seller: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       required: true,
     },
+
+    // Reviews & Ratings
     rating: {
       type: Number,
       default: 0,
@@ -74,6 +81,8 @@ const productSchema = new mongoose.Schema(
       default: 0,
     },
     reviews: [reviewSchema],
+
+    // Status
     isActive: {
       type: Boolean,
       default: true,
