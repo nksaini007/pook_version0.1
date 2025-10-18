@@ -7,7 +7,7 @@ import {
 } from "react-icons/fa";
 import {
   PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer,
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, LineChart, Line
+  LineChart, Line, CartesianGrid, XAxis, YAxis
 } from "recharts";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
@@ -56,16 +56,9 @@ const AdminDashboard = () => {
     return acc;
   }, {}));
 
-  const productsByCategory = Object.values(products.reduce((acc, p) => {
-    acc[p.category] = acc[p.category] || { name: p.category, value: 0 };
-    acc[p.category].value += 1;
-    return acc;
-  }, {}));
-
-  const COLORS = ["#9aa2a8ff", "#fa913cff", "#ffd43b", "#51cf66", "#748ffc", "#845ef7"];
+  const COLORS = ["#ff6a00", "#ff4500", "#ffa500", "#ff8c00", "#ff7f50"];
   const userGrowth = users.map((u, i) => ({ day: `Day ${i + 1}`, users: i + 1 }));
 
-  // Mock user locations for map chart
   const userLocations = [
     { lat: 28.6139, lng: 77.2090, name: "New Delhi" },
     { lat: 19.0760, lng: 72.8777, name: "Mumbai" },
@@ -77,7 +70,7 @@ const AdminDashboard = () => {
       <Nev />
       <div className="min-h-screen bg-black text-white p-6 font-sans">
 
-        <h1 className="text-4xl font-bold mb-10 tracking-wide drop-shadow-sm">Welcome, Ghost</h1>
+        <h1 className="text-4xl font-bold mb-10 tracking-wide drop-shadow-lg ">Welcome, Ghost</h1>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-12">
@@ -86,68 +79,66 @@ const AdminDashboard = () => {
           { title: "Total Products", value: totalProducts, icon: <FaBox size={28} /> },
           { title: "Low Stock", value: lowStockProducts, icon: <FaBell size={28} /> },
           { title: "Total Stock", value: totalStock, icon: <FaBox size={28} /> }].map((stat, idx) => (
-            <div key={idx} className="bg-gray-800 p-5 rounded-xl shadow hover:shadow-lg transition transform hover:-translate-y-1">
+            <div key={idx} className="bg-gray-800 p-5 rounded-xl shadow-lg hover:shadow-orange-500/50 transition transform hover:-translate-y-1 border border-gray-500/50">
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-sm font-semibold text-white">{stat.title}</h3>
-                  <p className="text-2xl font-bold mt-1">{stat.value}</p>
+                  <p className="text-2xl font-bold mt-1 ">{stat.value}</p>
                 </div>
-                <div className="text-white">{stat.icon}</div>
+                <div className="">{stat.icon}</div>
               </div>
             </div>
           ))}
         </div>
 
-        {/* Charts */}
+        {/* Charts & Map */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
 
           {/* Users by Role */}
-          <div className="bg-gray-800 p-5 rounded-xl shadow border border-gray-700">
-            <h3 className="text-lg font-semibold mb-3 flex items-center gap-2"><FaChartBar /> Users by Role</h3>
+          <div className="bg-gray-700 p-5 rounded-xl shadow-lg border border-gray-500/50">
+            <h3 className="text-lg font-semibold mb-3 flex items-center gap-2 "><FaChartBar /> Users by Role</h3>
             <ResponsiveContainer width="100%" height={220}>
               <PieChart>
-                <Pie data={usersByRoleData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={70} label>
+                <Pie data={usersByRoleData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label>
                   {usersByRoleData.map((entry, index) => <Cell key={index} fill={COLORS[index % COLORS.length]} />)}
                 </Pie>
-                <Tooltip contentStyle={{ background: '#222', border: '1px solid #555' }} itemStyle={{ color: '#fff' }} />
+                <Tooltip contentStyle={{ background: '#111', border: '1px solid #555' }} itemStyle={{ color: '#fff' }} />
                 <Legend wrapperStyle={{ color: '#fff' }} />
               </PieChart>
             </ResponsiveContainer>
           </div>
 
-          {/* Map Chart */}
-          <div className="bg-gray-800 rounded-xl shadow border border-gray-700 overflow-hidden">
-            <h3 className="text-lg font-semibold mb-2 px-4 pt-4">User Locations Map</h3>
-            <div className="w-full h-56"> {/* full width container with fixed height */}
-              <MapContainer
-                center={[20.5937, 78.9629]}
-                zoom={4}
-                scrollWheelZoom={false}
-                style={{ width: "100%", height: "100%" }}
-              >
-                <TileLayer
-                  url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                />
-                {userLocations.map((user, idx) => (
-                  <Marker key={idx} position={[user.lat, user.lng]}>
-                    <Popup>{user.name}</Popup>
-                  </Marker>
-                ))}
-              </MapContainer>
-            </div>
+          {/* Bigger Map */}
+          <div className="bg-gray-800 rounded-xl shadow-lg border border-gray-500/50 overflow-hidden col-span-1 md:col-span-2 h-[500px]">
+            <h3 className="text-lg font-semibold mb-2 px-4 pt-4 ">User Locations Map</h3>
+            <MapContainer
+              center={[20.5937, 78.9629]}
+              zoom={4}
+              scrollWheelZoom={true}
+              style={{ width: "100%", height: "100%" }}
+            >
+              <TileLayer
+                url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+              />
+              {userLocations.map((user, idx) => (
+                <Marker key={idx} position={[user.lat, user.lng]}>
+                  <Popup>{user.name}</Popup>
+                </Marker>
+              ))}
+            </MapContainer>
           </div>
 
           {/* User Growth */}
-          <div className="bg-gray-800 p-5 rounded-xl shadow border border-gray-700">
-            <h3 className="text-lg font-semibold mb-3 flex items-center gap-2"><FaChartBar /> User Growth</h3>
+          <div className="bg-gray-800 p-5 rounded-xl shadow-lg border border-gray-500/50">
+            <h3 className="text-lg font-semibold mb-3 flex items-center gap-2 text-orange-400"><FaChartBar /> User Growth</h3>
             <ResponsiveContainer width="100%" height={220}>
               <LineChart data={userGrowth}>
-                <CartesianGrid stroke="#555" strokeDasharray="3 3" />
+                <CartesianGrid stroke="#444" strokeDasharray="3 3" />
                 <XAxis dataKey="day" stroke="#fff" />
                 <YAxis stroke="#fff" />
-                <Tooltip contentStyle={{ background: '#222', border: '1px solid #555' }} itemStyle={{ color: '#fff' }} />
-                <Line type="monotone" dataKey="users" stroke="#ffa500" strokeWidth={3} />
+                <Tooltip contentStyle={{ background: '#111', border: '1px solid #555' }} itemStyle={{ color: '#fff' }} />
+                <Line type="monotone" dataKey="users" stroke="#ff6a00" strokeWidth={3} dot={{ fill: '#ff6a00' }} />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -156,7 +147,7 @@ const AdminDashboard = () => {
         {/* Search & Filter */}
         <div className="mb-8 flex flex-wrap gap-4 items-center">
           <div className="flex items-center border border-gray-600 rounded-lg px-3 py-2 bg-gray-800">
-            <FaSearch className="mr-2 text-white" />
+            <FaSearch className="mr-2 text-orange-500" />
             <input
               type="text"
               placeholder="Search Users..."
@@ -178,7 +169,7 @@ const AdminDashboard = () => {
         {/* Users List */}
         <div className="mb-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredUsers.map(user => (
-            <div key={user._id} className="bg-gray-700 p-5 rounded-xl shadow hover:shadow-lg transition transform hover:-translate-y-1 border border-gray-700 flex justify-between items-center">
+            <div key={user._id} className="bg-gray-700 p-5 rounded-xl shadow-lg hover:shadow-orange-500/50 transition transform hover:-translate-y-1 border border-gray-500/50 flex justify-between items-center">
               <div>
                 <h4 className="font-semibold text-white">{user.name}</h4>
                 <p className="text-gray-300 text-sm">{user.email}</p>

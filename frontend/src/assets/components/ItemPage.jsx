@@ -1,36 +1,75 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import Nev from './Nev';
-import Footer from './Footer';
-import productData from '../json/Products.json';
+import React, { useEffect, useState } from "react";
+import { useParams, Link } from "react-router-dom";
+import Nev from "./Nev";
+import Footer from "./Footer";
 
 function ItemPage() {
   const { categoryName, itemName } = useParams();
   const [types, setTypes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    const fetchData = () => {
-      const filtered = productData.filter(
-        (item) =>
-          item.category.toLowerCase() === categoryName.toLowerCase() &&
-          item.subcategory.toLowerCase() === itemName.toLowerCase()
-      );
+    const fetchProducts = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setError("You must be logged in to view products.");
+        setLoading(false);
+        return;
+      }
 
-      const uniqueTypesMap = new Map();
-      filtered.forEach((item) => {
-        const typeKey = item.type.toLowerCase();
-        if (!uniqueTypesMap.has(typeKey)) {
-          uniqueTypesMap.set(typeKey, {
-            type: item.type,
-            image: item.image || null,
-          });
+      try {
+        setLoading(true);
+        const res = await fetch("http://localhost:5000/api/products/public", {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
         }
-      });
 
-      setTypes(Array.from(uniqueTypesMap.values()));
+        const data = await res.json();
+        const products = Array.isArray(data) ? data : data.products || [];
+
+        // Filter products for this category & subcategory
+        const filtered = products.filter(
+          (item) =>
+            item.category.toLowerCase() === categoryName.toLowerCase() &&
+            item.subcategory.toLowerCase() === itemName.toLowerCase()
+        );
+
+        // Extract unique types and get first image for each type
+        const uniqueTypesMap = new Map();
+        filtered.forEach((item) => {
+          const typeKey = item.type.toLowerCase();
+          if (!uniqueTypesMap.has(typeKey)) {
+            const imageUrl =
+              item.images && item.images.length > 0
+                ? item.images[0].url.startsWith("http")
+                  ? item.images[0].url
+                  : `http://localhost:5000${item.images[0].url}`
+                : null;
+
+            uniqueTypesMap.set(typeKey, {
+              type: item.type,
+              image: imageUrl,
+            });
+          }
+        });
+
+        setTypes(Array.from(uniqueTypesMap.values()));
+      } catch (err) {
+        console.error("Error fetching products:", err);
+        setError("Failed to fetch products. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
     };
 
-    fetchData();
+    fetchProducts();
   }, [categoryName, itemName]);
 
   return (
@@ -40,20 +79,13 @@ function ItemPage() {
       <div className="max-w-7xl min-h-screen mx-auto px-4 py-10">
         {/* Header */}
         <div className="relative text-left mb-14">
-          {/* Soft Background Glow */}
           <div className="absolute inset-0 -top-10 h-40 bg-gradient-to-r from-orange-200 via-purple-200 to-orange-200 opacity-30 blur-3xl rounded-3xl"></div>
-
-          {/* Heading */}
           <h1 className="relative text-5xl font-extrabold bg-gray-400 bg-clip-text text-transparent drop-shadow-md">
-            {itemName} 
+            {itemName}
           </h1>
-
-          {/* Subtext */}
           <p className="relative mt-3 text-gray-600 text-lg tracking-wide">
             Category: <span className="font-semibold text-gray-400">{categoryName}</span>
           </p>
-
-          {/* Breadcrumb */}
           <div className="relative mt-4 flex justify-left space-x-2 text-sm text-gray-500">
             <Link to="/" className="hover:text-orange-400 transition">Home</Link>
             <span>/</span>
@@ -65,16 +97,22 @@ function ItemPage() {
           </div>
         </div>
 
+        {/* Error */}
+        {error && (
+          <p className="text-red-500 text-center mb-6">{error}</p>
+        )}
+
         {/* Types Grid */}
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-          {types.length > 0 ? (
-            types.map(({ type, image }, idx) => (
+        {loading ? (
+          <p className="text-center text-gray-500 text-lg">Loading types...</p>
+        ) : types.length > 0 ? (
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+            {types.map(({ type, image }) => (
               <Link
-                key={idx}
+                key={type.toLowerCase()}
                 to={`/category/${categoryName}/${itemName}/${type.toLowerCase()}`}
                 className="bg-white/70 rounded-xl shadow-md hover:shadow-lg transition transform hover:-translate-y-1 duration-300 flex flex-col overflow-hidden"
               >
-                {/* Image Section */}
                 {image ? (
                   <img
                     src={image}
@@ -87,24 +125,20 @@ function ItemPage() {
                     No image available
                   </div>
                 )}
-
-                {/* Text Section */}
                 <div className="p-5 flex flex-col flex-grow">
-                  <h2 className="text-xl font-bold text-gray-900 mb-2 capitalize">
-                    {type}
-                  </h2>
+                  <h2 className="text-xl font-bold text-gray-900 mb-2 capitalize">{type}</h2>
                   <p className="text-gray-600 text-sm mt-auto">
                     See all {type.toLowerCase()} {itemName.toLowerCase()}s
                   </p>
                 </div>
               </Link>
-            ))
-          ) : (
-            <p className="text-gray-600 col-span-full text-center">
-              No types found for this item.
-            </p>
-          )}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-600 col-span-full text-center">
+            No types found for this item.
+          </p>
+        )}
       </div>
 
       <Footer />

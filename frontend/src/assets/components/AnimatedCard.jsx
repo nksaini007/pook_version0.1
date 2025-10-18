@@ -9,7 +9,7 @@ import { AuthContext } from '../context/AuthContext';
 const containerVariants = {
   hidden: { opacity: 0, y: 30 },
   visible: {
-    opacity: 0.5,
+    opacity: 1,
     y: 0,
     transition: {
       staggerChildren: 0.2,

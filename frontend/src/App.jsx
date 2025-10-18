@@ -33,7 +33,8 @@ function App() {
         <Route path="/category/:categoryName" element={<CategoryPage />} />
         <Route path="/category/:categoryName/:itemName" element={<ItemPage />} />
         <Route path="/category/:categoryName/:itemName/:itemList" element={<ItemList />} />
-        <Route path="/category/:categoryName/:itemName/:itemList/:productName" element={<ProductPage />} />
+        {/* <Route path="/category/:categoryName/:itemName/:itemList/:productName" element={<ProductPage />} /> */}
+        <Route path="/category/:categoryName/:itemName/:itemList/:productId" element={<ProductPage />} />
 
 
       </Routes>
