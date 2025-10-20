@@ -90,7 +90,7 @@ const AdminDashboard = () => {
             </div>
           ))}
         </div>
-
+              <AdminCategoryDashboard />
         {/* Charts & Map */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
 
@@ -128,7 +128,7 @@ const AdminDashboard = () => {
               ))}
             </MapContainer>
           </div>
-
+                
           {/* User Growth */}
           <div className="bg-gray-800 p-5 rounded-xl shadow-lg border border-gray-500/50">
             <h3 className="text-lg font-semibold mb-3 flex items-center gap-2 text-orange-400"><FaChartBar /> User Growth</h3>
@@ -184,7 +184,7 @@ const AdminDashboard = () => {
         </div>
 
         {/* Categories Dashboard */}
-        <AdminCategoryDashboard />
+      
       </div>
     </>
   );

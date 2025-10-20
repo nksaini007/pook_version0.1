@@ -1,9 +1,9 @@
 import React, { useContext, useState } from 'react';
 import { motion } from 'framer-motion';
-import userImg from '../img/city.jpg';       // Normal user background
-import adminImg from '../img/220821.gif';    // Admin background
-import sellerImg from '../img/dance.gif';   // Seller background
-import { FaSearch, FaCrown } from "react-icons/fa";
+import userImg from '../img/city.jpg';
+import adminImg from '../img/220821.gif';
+import sellerImg from '../img/bird.gif';
+import { FaSearch } from "react-icons/fa";
 import { AuthContext } from '../context/AuthContext';
 
 const containerVariants = {
@@ -54,7 +54,6 @@ const LandingPage = () => {
   const isAdmin = user?.role === 'admin';
   const isSeller = user?.role === 'seller';
 
-  // Background selection based on role
   let backgroundImage;
   if (isAdmin) backgroundImage = adminImg;
   else if (isSeller) backgroundImage = sellerImg;
@@ -67,7 +66,7 @@ const LandingPage = () => {
         background: isAdmin
           ? `linear-gradient(to bottom right, rgba(10,10,10,0.36), rgba(30,30,30,0.9)), url(${backgroundImage}) center/cover no-repeat`
           : isSeller
-          ? `linear-gradient(to bottom right, rgba(200,200,255,0.5), rgba(150,150,255,0.6)), url(${backgroundImage}) center/cover no-repeat`
+          ? `linear-gradient(to bottom right, rgba(5,10,20,0.85), rgba(20,30,50,0.95)), url(${backgroundImage}) center/cover no-repeat`
           : `linear-gradient(to bottom right, rgba(255,255,255,0.7), rgba(255,240,220,0.6)), url(${backgroundImage}) center/cover no-repeat`
       }}
     >
@@ -83,6 +82,8 @@ const LandingPage = () => {
         <motion.h1
           variants={itemVariants}
           style={isAdmin ? styles.adminHeading : isSeller ? styles.sellerHeading : styles.heading}
+          animate={isSeller ? { y: [0, -5, 0] } : {}}
+          transition={isSeller ? { duration: 3, repeat: Infinity, ease: "easeInOut" } : {}}
         >
           Welcome{" "}
           <span style={isAdmin ? styles.adminHighlight : isSeller ? styles.sellerHighlight : styles.highlight}>
@@ -212,12 +213,14 @@ const styles = {
     letterSpacing: '1px'
   },
   sellerHeading: {
-    fontSize: '3rem',
+    fontSize: '3.2rem',
     marginBottom: '1rem',
-    fontWeight: 'bold',
-    color: '#ffffff',
-    textShadow: '0 0 10px rgba(0, 150, 255, 0.8)',
-    letterSpacing: '1px'
+    fontWeight: '700',
+    background: 'linear-gradient(90deg, #00bfff, #00e6ac)',
+    WebkitBackgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
+    letterSpacing: '1px',
+    textShadow: '0 0 20px rgba(0, 255, 200, 0.4)',
   },
   highlight: {
     color: '#ff7a00'
@@ -227,8 +230,9 @@ const styles = {
     textShadow: '0 0 20px rgba(255, 150, 0, 0.9)'
   },
   sellerHighlight: {
-    color: '#00c3ff',
-    textShadow: '0 0 20px rgba(0, 200, 255, 0.9)'
+    color: '#00e6ff',
+    textShadow: '0 0 20px rgba(0, 200, 255, 0.9)',
+    fontWeight: '700'
   },
   subtext: {
     fontSize: '1.25rem',
@@ -244,12 +248,13 @@ const styles = {
     letterSpacing: '1px'
   },
   sellerSubtext: {
-    fontSize: '1.3rem',
-    color: '#b3e0ff',
-    fontWeight: '600',
+    fontSize: '1.25rem',
+    color: '#a0e7ff',
+    fontWeight: '500',
     marginBottom: '2rem',
     textTransform: 'uppercase',
-    letterSpacing: '1px'
+    letterSpacing: '2px',
+    textShadow: '0 0 10px rgba(0, 180, 255, 0.5)',
   },
   searchForm: {
     display: 'flex',
