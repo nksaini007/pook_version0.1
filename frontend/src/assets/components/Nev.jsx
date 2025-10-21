@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext } from "react";
 import { FaShoppingCart } from "react-icons/fa";
 import { Link, NavLink } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
@@ -14,7 +14,7 @@ const Nev = () => {
 
   return (
     <>
-      {/* 🌑 ADMIN DARK NAVBAR */}
+      {/* 🌑 NAVBAR */}
       <nav
         className={`fixed top-0 w-full z-50 transition-colors duration-500 ${
           isAdmin
@@ -24,16 +24,21 @@ const Nev = () => {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10">
           <div className="flex justify-between items-center py-3">
-            
-            {/* 🔹 LOGO */}
+            {/* LOGO */}
             <div className="flex items-center gap-3 text-2xl font-bold tracking-wider">
-              <img src={img2} alt="Logo" height={40} width={40} className="rounded-full shadow-md" />
+              <img
+                src={img2}
+                alt="Logo"
+                height={40}
+                width={40}
+                className="rounded-full shadow-md"
+              />
               <span className={`${isAdmin ? "text-orange-400" : "text-gray-800"}`}>
                 mkigns
               </span>
             </div>
 
-            {/* 🔸 NAVIGATION LINKS */}
+            {/* DESKTOP NAV LINKS */}
             <div className="hidden md:flex items-center gap-6">
               <div
                 className={`flex items-center rounded-xl px-2 py-1 transition-all duration-300 ${
@@ -66,7 +71,7 @@ const Nev = () => {
                 })}
               </div>
 
-              {/* 🔸 ACTIONS */}
+              {/* ACTION BUTTONS */}
               <div className="flex items-center gap-4">
                 <Link
                   to="/cart"
@@ -113,25 +118,33 @@ const Nev = () => {
           { to: "/appliances", icon: "fa-blender", label: "Appliances" },
           { to: "/services", icon: "fa-handshake", label: "Services" },
           { to: "/cart", icon: "fa-cart-shopping", label: "Cart" },
-          { to: user ? "/profile" : "/login", icon: "fa-user", label: user ? "Profile" : "Login" },
         ].map(({ to, icon, label }) => (
           <NavLink
             key={label}
             to={to}
             className={({ isActive }) =>
               `flex flex-col items-center text-xs p-1 transition ${
-                isActive
-                  ? isAdmin
-                    ? "text-orange-400"
-                    : "text-orange-500"
-                  : "text-gray-400 hover:text-orange-300"
+                isActive ? "text-orange-500" : "text-gray-400 hover:text-orange-300"
               }`
             }
           >
             <i className={`fa-solid ${icon} text-lg`}></i>
-            <span>{label}</span>
+            <span className="text-xs">{label}</span>
           </NavLink>
         ))}
+
+        {/* MOBILE PROFILE ICON */}
+        {user ? (
+          <ProfileDropdown user={user} logout={logout} mobile={true} />
+        ) : (
+          <NavLink
+            to="/login"
+            className="flex flex-col items-center text-xs p-1 text-gray-400 hover:text-orange-300"
+          >
+            <i className="fa-solid fa-user text-lg"></i>
+            <span className="text-xs">Login</span>
+          </NavLink>
+        )}
       </div>
     </>
   );
