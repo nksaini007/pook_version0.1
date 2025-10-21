@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react';
 import { motion } from 'framer-motion';
 import userImg from '../img/city.jpg';
-import adminImg from '../img/220821.gif';
+import adminImg from '../img/fb.gif';
 import sellerImg from '../img/bird.gif';
 import { FaSearch } from "react-icons/fa";
 import { AuthContext } from '../context/AuthContext';
@@ -98,7 +98,7 @@ const LandingPage = () => {
         >
           {isAdmin ? (
             <span className="flex items-center justify-center gap-2">
-              Admin Dashboard Control Center
+             
             </span>
           ) : isSeller ? (
             <span className="flex items-center justify-center gap-2">

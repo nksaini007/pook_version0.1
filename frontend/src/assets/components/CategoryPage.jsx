@@ -4,11 +4,19 @@ import { motion } from "framer-motion";
 import axios from "axios";
 import Nev from "./Nev";
 import Footer from "./Footer";
+import { FaBoxes } from "react-icons/fa";
 
 const CategoryPage = () => {
   const { categoryName } = useParams();
   const [category, setCategory] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  // Convert image filename to full URL
+  const getImageUrl = (img) => {
+    if (!img) return null;
+    const cleanImg = img.replace(/^\/+/, "");
+    return img.startsWith("http") ? img : `http://localhost:5000/${cleanImg}`;
+  };
 
   // Fetch all categories from backend
   useEffect(() => {
@@ -60,27 +68,40 @@ const CategoryPage = () => {
       <Nev />
 
       <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-8 py-12">
-        {/* Page Header */}
+
+        {/* Category Banner Image */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7 }}
-          className="text-center mb-14 relative"
+          className="w-full mb-12 relative rounded-2xl overflow-hidden shadow-lg"
         >
-          <h1 className="relative text-5xl sm:text-6xl font-extrabold text-gray-900 mb-3 tracking-tight capitalize">
+          {category.image ? (
+            <img
+              src={getImageUrl(category.image)}
+              alt={category.name}
+              className="w-full h-64 md:h-80 lg:h-96 object-cover"
+            />
+          ) : (
+            <div className="w-full h-64 md:h-80 lg:h-96 flex items-center justify-center bg-gray-200">
+              <FaBoxes className="text-6xl text-gray-400" />
+            </div>
+          )}
+          <div className="absolute bottom-4 left-6 text-white text-3xl md:text-4xl font-bold shadow-lg capitalize">
             {category.name}
-          </h1>
-
-          <div className="relative mt-4 text-sm text-gray-500">
-            <Link
-              to="/"
-              className="hover:text-yellow-500 font-medium transition duration-300"
-            >
-              Home
-            </Link>{" "}
-            / <span className="text-gray-600 font-semibold">{category.name}</span>
           </div>
         </motion.div>
+
+        {/* Breadcrumb */}
+        <div className="text-sm text-gray-500 mb-8">
+          <Link
+            to="/"
+            className="hover:text-yellow-500 font-medium transition duration-300"
+          >
+            Home
+          </Link>{" "}
+          / <span className="text-gray-600 font-semibold">{category.name}</span>
+        </div>
 
         {/* Subcategories */}
         <motion.div
@@ -106,6 +127,14 @@ const CategoryPage = () => {
                   to={`/category/${categoryName}/${sub.name.toLowerCase()}`}
                   className="block bg-white/80 backdrop-blur-xl border border-gray-200 rounded-2xl p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
                 >
+                  {/* Subcategory Image */}
+                  {sub.image && (
+                    <img
+                      src={getImageUrl(sub.image)}
+                      alt={sub.name}
+                      className="w-full h-36 object-cover rounded-xl mb-3"
+                    />
+                  )}
                   <h3 className="text-lg font-semibold text-gray-800 mb-2 capitalize">
                     {sub.name}
                   </h3>
