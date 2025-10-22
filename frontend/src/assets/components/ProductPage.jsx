@@ -35,12 +35,13 @@ const ProductPage = () => {
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         const data = await res.json();
 
-        // Use the first image as default selected
-        if (data.images && data.images.length > 0) setSelectedImage(
-          data.images[0].url.startsWith("http")
-            ? data.images[0].url
-            : `http://localhost:5000${data.images[0].url}`
-        );
+        if (data.images && data.images.length > 0) {
+          setSelectedImage(
+            data.images[0].url.startsWith("http")
+              ? data.images[0].url
+              : `http://localhost:5000${data.images[0].url}`
+          );
+        }
 
         setProductInfo({
           ...data,
@@ -86,9 +87,8 @@ const ProductPage = () => {
   return (
     <>
       <Nev />
-      <div className="bg-gradient-to-br from-white via-gray-50 to-gray-100 min-h-screen px-6 py-8 text-gray-800">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-          
+      <div className="bg-gradient-to-br from-white via-gray-50 to-gray-100 min-h-screen px-6 py-8 text-gray-800 mt-15">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 max-w-7xl mx-auto">
           {/* Product Images */}
           <div>
             <div className="bg-white p-2 rounded-xl shadow-lg">
@@ -105,7 +105,7 @@ const ProductPage = () => {
                     key={idx}
                     src={img}
                     alt={`Thumbnail ${idx}`}
-                    className={`w-20 h-20 object-cover rounded-lg cursor-pointer border-2 ${
+                    className={`w-20 h-20 object-cover rounded-lg cursor-pointer border-2 shadow-sm hover:shadow-md transition-all duration-300 ${
                       selectedImage === img ? "border-orange-500" : "border-gray-200"
                     }`}
                     onClick={() => setSelectedImage(img)}
@@ -205,7 +205,7 @@ const ProductPage = () => {
             <div className="flex flex-col sm:flex-row gap-4 mt-10 relative">
               <button
                 onClick={handleAddToCart}
-                className={`flex items-center justify-center bg-gray-700 hover:bg-gray-800 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition transform ${added ? "scale-105" : ""}`}
+                className={`flex items-center justify-center bg-gray-700 hover:bg-gray-800 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition-all duration-300 transform ${added ? "scale-105" : ""}`}
                 disabled={productInfo.stock === 0}
               >
                 Add to Cart
@@ -215,13 +215,12 @@ const ProductPage = () => {
                   handleAddToCart();
                   window.location.href = "/cart";
                 }}
-                className="flex items-center justify-center bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition disabled:opacity-50"
+                className="flex items-center justify-center bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-300 disabled:opacity-50"
                 disabled={productInfo.stock === 0}
               >
                 Buy Now
               </button>
 
-              {/* Toast Notification */}
               {added && (
                 <div className="absolute -top-14 left-1/2 -translate-x-1/2 bg-green-500 text-white px-4 py-2 rounded-full shadow-lg animate-bounce">
                   ✅ Added to Cart!
@@ -231,7 +230,6 @@ const ProductPage = () => {
           </div>
         </div>
       </div>
-
       <Footer />
     </>
   );

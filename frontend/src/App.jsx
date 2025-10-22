@@ -15,6 +15,7 @@ import Cart from './assets/components/Cart'
 import ScrollToTop from './assets/components/ScrollToTop';
 import Dashboardloader from './assets/components/dashboard/Dashboardloader';
 import Profile from './assets/components/Profile';
+import Contact from './assets/components/contact/Contact';
 function App() {
   const [count, setCount] = useState(0)
 
@@ -25,6 +26,7 @@ function App() {
       <Routes>
         <Route path='/' element={<Home />} />
         <Route path='/login' element={<Login />} />
+          <Route path='/contact' element={<Contact/>} />
         <Route path='/profile' element={<Profile />} />
         <Route path='/signup' element={<Signup />} />
          <Route path='/dashboard' element={<Dashboardloader />} />

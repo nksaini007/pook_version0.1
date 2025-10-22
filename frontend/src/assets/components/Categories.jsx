@@ -1,25 +1,23 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
-import { FaBoxes, FaSpinner } from "react-icons/fa";
+import { FaBoxes, FaSpinner, FaSearch } from "react-icons/fa";
 
 const Categories = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
 
-  // Convert image filename to full URL
   const getImageUrl = (img) => {
     if (!img) return null;
-    const cleanImg = img.replace(/^\/+/, ""); // remove leading slashes
-    return img.startsWith("http") ? img : `http://localhost:5000/${cleanImg}`;
+    const cleanImg = img.replace(/^\/+/, "");
+    return img.startsWith("http") ? img : `http://192.168.29.252:5000/${cleanImg}`;
   };
 
-  // Fetch categories from backend
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/categories");
-        console.log("API Response:", res.data);
+        const res = await axios.get("http://192.168.29.252:5000/api/categories");
         setCategories(Array.isArray(res.data) ? res.data : []);
       } catch (error) {
         console.error("Error fetching categories:", error);
@@ -29,6 +27,10 @@ const Categories = () => {
     };
     fetchCategories();
   }, []);
+
+  const filteredCategories = categories.filter((cat) =>
+    cat.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   if (loading) {
     return (
@@ -40,18 +42,33 @@ const Categories = () => {
   }
 
   return (
-    <div className="relative min-h-screen bg-gray-50 overflow-hidden pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+    <div className="relative min-h-screen bg-gray-50 overflow-hidden pt-24 pb-6 px-2 sm:px-6 lg:px-8">
       {/* Background Effects */}
       <div className="absolute top-0 left-0 w-full h-1/2 bg-white skew-y-[-3deg] origin-top-left -translate-y-1/2 opacity-70"></div>
       <div className="absolute top-1/2 right-0 w-1/3 h-1/2 bg-orange-100/50 skew-y-[2deg] origin-top-right translate-y-1/4 opacity-40 rounded-full blur-3xl"></div>
 
       <div className="relative z-10 max-w-7xl mx-auto">
-        <h2 className="text-3xl sm:text-4xl lg:text-5xl text-gray-900 text-center mb-12 font-extrabold tracking-tight">
+        <h2 className="text-2xl sm:text-2xl lg:text-2xl text-gray-900 text-center mb-6 font-bold tracking-tight">
           Discover Our Core Categories
         </h2>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 sm:gap-8">
-          {categories.map((category, index) => (
+        {/* Search Bar */}
+        <div className="flex justify-center mb-10">
+          <div className="relative w-full max-w-md">
+            <input
+              type="text"
+              placeholder="Search categories..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-400 placeholder-gray-400 shadow-sm"
+            />
+            <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          </div>
+        </div>
+
+        {/* Categories Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-8">
+          {filteredCategories.map((category, index) => (
             <Link
               key={category._id || index}
               to={`/category/${category.name}`}
@@ -60,7 +77,7 @@ const Categories = () => {
               <div className="bg-white rounded-2xl overflow-hidden shadow-xl border border-gray-100 transition-all duration-500 transform hover:shadow-2xl hover:scale-[1.03] hover:border-orange-400/50 flex flex-col h-full cursor-pointer">
 
                 {/* Full-size Image */}
-                <div className="w-full h-30 md:h-52 lg:h-40 relative overflow-hidden">
+                <div className="w-full p-1 h-30 md:h-52 lg:h-40 relative overflow-hidden">
                   {category.image ? (
                     <img
                       src={getImageUrl(category.image)}
@@ -80,7 +97,7 @@ const Categories = () => {
                     {category.name}
                   </h3>
 
-                  {/* Subcategories (first 6) */}
+                  {/* Subcategories */}
                   <div className="flex flex-wrap justify-center gap-2 mt-2">
                     {category.subcategories?.slice(0, 6).map((sub, idx) => (
                       <span
@@ -100,13 +117,13 @@ const Categories = () => {
               </div>
             </Link>
           ))}
-        </div>
 
-        {categories.length === 0 && (
-          <p className="text-center text-gray-400 mt-16 text-xl">
-            😔 No categories found. Please check the backend connection.
-          </p>
-        )}
+          {filteredCategories.length === 0 && (
+            <p className="text-center text-gray-400 col-span-full mt-16 text-xl">
+              No categories match your search.
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { FaPlus, FaTrash, FaEdit, FaSave, FaTimes, FaLayerGroup } from "react-icons/fa";
 import API from "../../api/api";
 import Nev from "../Nev";
+import { motion } from "framer-motion";
 
 const AdminCategoryDashboard = () => {
   const [categories, setCategories] = useState([]);
@@ -11,17 +12,6 @@ const AdminCategoryDashboard = () => {
   const [subName, setSubName] = useState("");
   const [subImage, setSubImage] = useState(null);
   const [editingSub, setEditingSub] = useState({ catId: null, subId: null, name: "", image: null });
-
-  const darkInputClass =
-    "p-3 rounded-lg w-full bg-[#1E1E1E] border border-[#2F2F2F] text-[#E0E0E0] placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#FF8C42] focus:border-[#FF8C42] transition-all duration-200";
-  const primaryButtonClass =
-    "bg-[#FF8C42] hover:bg-[#ff9c59] text-white px-6 py-3 rounded-lg flex items-center justify-center gap-2 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-[1.02]";
-  const secondaryButtonClass =
-    "bg-[#2C2C2C] hover:bg-[#3A3A3A] text-gray-200 px-4 py-3 rounded-lg flex items-center justify-center gap-2 transition-colors";
-  const dangerButtonClass =
-    "bg-[#B91C1C] hover:bg-[#DC2626] text-white p-2 rounded-full transition-colors shadow-sm";
-  const editButtonClass =
-    "bg-[#EAB308] hover:bg-[#FACC15] text-black p-2 rounded-full transition-colors shadow-sm";
 
   // Fetch categories
   const fetchCategories = async () => {
@@ -37,10 +27,9 @@ const AdminCategoryDashboard = () => {
     fetchCategories();
   }, []);
 
-  // --- Category CRUD ---
+  // --- CRUD Operations ---
   const handleAddOrEditCategory = async () => {
     if (!categoryName.trim()) return alert("Category name is required");
-
     const formData = new FormData();
     formData.append("name", categoryName);
     if (categoryImage) formData.append("categoryImage", categoryImage);
@@ -60,8 +49,8 @@ const AdminCategoryDashboard = () => {
       setCategoryImage(null);
       fetchCategories();
     } catch (err) {
-      console.error(err.response?.data || err);
-      alert(err.response?.data?.message || "Operation failed.");
+      console.error(err);
+      alert("Operation failed.");
     }
   };
 
@@ -71,26 +60,21 @@ const AdminCategoryDashboard = () => {
       await API.delete(`/categories/${id}`);
       fetchCategories();
     } catch (err) {
-      console.error(err.response?.data || err);
-      alert(err.response?.data?.message || "Deletion failed.");
+      console.error(err);
+      alert("Deletion failed.");
     }
   };
 
   const handleEditCategory = (cat) => {
     setCategoryName(cat.name);
     setEditingCategoryId(cat._id);
-    setCategoryImage(null);
-    setEditingSub({ catId: null, subId: null, name: "", image: null });
   };
 
-  // --- Subcategory CRUD ---
   const handleAddSubcategory = async (categoryId) => {
     if (!subName.trim()) return alert("Subcategory name is required");
-
     const formData = new FormData();
     formData.append("name", subName);
     if (subImage) formData.append("subcategoryImage", subImage);
-
     try {
       await API.post(`/categories/${categoryId}/subcategories`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
@@ -99,8 +83,8 @@ const AdminCategoryDashboard = () => {
       setSubImage(null);
       fetchCategories();
     } catch (err) {
-      console.error(err.response?.data || err);
-      alert(err.response?.data?.message || "Subcategory creation failed.");
+      console.error(err);
+      alert("Subcategory creation failed.");
     }
   };
 
@@ -119,8 +103,8 @@ const AdminCategoryDashboard = () => {
       setEditingSub({ catId: null, subId: null, name: "", image: null });
       fetchCategories();
     } catch (err) {
-      console.error(err.response?.data || err);
-      alert(err.response?.data?.message || "Subcategory update failed.");
+      console.error(err);
+      alert("Subcategory update failed.");
     }
   };
 
@@ -130,8 +114,8 @@ const AdminCategoryDashboard = () => {
       await API.delete(`/categories/${catId}/subcategories/${subId}`);
       fetchCategories();
     } catch (err) {
-      console.error(err.response?.data || err);
-      alert(err.response?.data?.message || "Subcategory deletion failed.");
+      console.error(err);
+      alert("Subcategory deletion failed.");
     }
   };
 
@@ -139,7 +123,6 @@ const AdminCategoryDashboard = () => {
     setEditingSub({ catId, subId: sub._id, name: sub.name, image: null });
   };
 
-  // --- Image Helper ---
   const getImageUrl = (img) => {
     if (!img) return null;
     if (img.startsWith("http")) return img;
@@ -150,132 +133,201 @@ const AdminCategoryDashboard = () => {
   return (
     <>
       <Nev />
-      <div className="min-h-screen bg-[#121212] text-[#E0E0E0] py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl font-extrabold text-white mb-10 border-b border-[#2F2F2F] pb-4 flex items-center gap-3">
-            <FaLayerGroup className="text-[#FF8C42]" /> Category Management Dashboard
-          </h1>
+      <div className="min-h-screen bg-gradient-to-br from-[#0d0d0d] via-[#1a1a1a] to-[#0d0d0d] text-gray-200 py-16 px-6 relative overflow-hidden">
+        {/* Background Glow */}
+        <div className="absolute inset-0 -z-10">
+          <div className="absolute top-1/4 left-1/3 w-[500px] h-[500px] bg-orange-500/10 rounded-full blur-[180px] animate-pulse"></div>
+          <div className="absolute bottom-1/3 right-1/4 w-[400px] h-[400px] bg-orange-400/10 rounded-full blur-[180px] animate-pulse"></div>
+        </div>
 
-          {/* Add/Edit Category */}
-          <div className="bg-[#1E1E1E] p-6 rounded-xl shadow-lg mb-12 border border-[#2F2F2F]">
-            <h2 className="text-2xl font-semibold mb-4 text-[#FF8C42]">
-              {editingCategoryId ? "Edit Main Category" : "Create New Main Category"}
+        <div className="max-w-7xl mx-auto">
+          {/* Title */}
+          <div className="text-center mb-12">
+            <h1 className="text-5xl font-extrabold bg-gradient-to-r from-orange-400 via-orange-300 to-yellow-400 bg-clip-text text-transparent flex items-center justify-center gap-3">
+              <FaLayerGroup /> Admin Category Control
+            </h1>
+            <p className="text-gray-400 mt-2 text-lg">
+              Manage your product categories and subcategories with style.
+            </p>
+          </div>
+
+          {/* Add/Edit Category Form */}
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 mb-12 shadow-lg hover:shadow-orange-500/10 transition-all duration-300"
+          >
+            <h2 className="text-2xl font-semibold text-orange-400 mb-6">
+              {editingCategoryId ? "Edit Category" : "Create New Category"}
             </h2>
             <div className="flex flex-col sm:flex-row gap-4 items-center">
               <input
                 type="text"
-                placeholder="Enter Category Name"
+                placeholder="Category name"
                 value={categoryName}
                 onChange={(e) => setCategoryName(e.target.value)}
-                className={darkInputClass}
+                className="flex-1 p-3 rounded-xl bg-[#121212] border border-[#2b2b2b] text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-400 outline-none transition-all"
               />
+
+              {/* Fixed File Input */}
               <input
                 type="file"
                 accept="image/*"
                 onChange={(e) => setCategoryImage(e.target.files[0])}
-                className="text-sm text-gray-400"
+                className="file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-orange-500/20 file:text-orange-400 hover:file:bg-orange-500/30 file:cursor-pointer bg-[#121212] border border-[#2b2b2b] text-gray-400 rounded-xl p-1.5 w-full sm:w-auto"
               />
-              <button onClick={handleAddOrEditCategory} className={primaryButtonClass}>
-                {editingCategoryId ? <><FaSave /> Save</> : <><FaPlus /> Add</>}
-              </button>
-              {editingCategoryId && (
-                <button
-                  onClick={() => {
-                    setCategoryName("");
-                    setCategoryImage(null);
-                    setEditingCategoryId(null);
-                  }}
-                  className={secondaryButtonClass}
-                >
-                  <FaTimes /> Cancel
-                </button>
-              )}
-            </div>
-          </div>
 
-          {/* Category Cards */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="flex gap-2">
+                <button
+                  onClick={handleAddOrEditCategory}
+                  className="bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-400 hover:to-yellow-400 text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 shadow-md transition-all"
+                >
+                  {editingCategoryId ? <><FaSave /> Save</> : <><FaPlus /> Add</>}
+                </button>
+                {editingCategoryId && (
+                  <button
+                    onClick={() => {
+                      setCategoryName("");
+                      setEditingCategoryId(null);
+                      setCategoryImage(null);
+                    }}
+                    className="bg-gray-700 hover:bg-gray-600 text-white px-5 py-3 rounded-xl flex items-center gap-2 transition-all"
+                  >
+                    <FaTimes /> Cancel
+                  </button>
+                )}
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Category Grid */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
             {categories.map((cat) => (
-              <div key={cat._id} className="bg-[#1E1E1E] shadow-lg rounded-xl p-6 border-t-4 border-[#FF8C42] hover:shadow-[#FF8C42]/30 transition-all duration-300">
-                <div className="flex justify-between items-start mb-4 border-b border-[#2F2F2F] pb-3">
+              <motion.div
+                key={cat._id}
+                whileHover={{ scale: 1.02 }}
+                className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-3xl p-6 shadow-lg hover:shadow-orange-400/20 transition-all duration-300 flex flex-col"
+              >
+                <div className="flex justify-between items-start mb-4">
                   <div className="flex items-center gap-3">
                     {cat.image && (
                       <img
                         src={getImageUrl(cat.image)}
                         alt={cat.name}
-                        className="w-12 h-12 object-cover rounded-lg"
+                        className="w-14 h-14 object-cover rounded-2xl border border-orange-500/30"
                       />
                     )}
-                    <h2 className="text-2xl font-bold text-white capitalize">{cat.name}</h2>
+                    <h3 className="text-xl font-semibold capitalize text-white">{cat.name}</h3>
                   </div>
                   <div className="flex gap-2">
-                    <button onClick={() => handleEditCategory(cat)} className={editButtonClass}><FaEdit /></button>
-                    <button onClick={() => handleDeleteCategory(cat._id)} className={dangerButtonClass}><FaTrash /></button>
+                    <button
+                      onClick={() => handleEditCategory(cat)}
+                      className="p-2 bg-yellow-500/20 hover:bg-yellow-500/30 rounded-full text-yellow-400"
+                    >
+                      <FaEdit />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteCategory(cat._id)}
+                      className="p-2 bg-red-500/20 hover:bg-red-500/30 rounded-full text-red-400"
+                    >
+                      <FaTrash />
+                    </button>
                   </div>
                 </div>
 
-                {/* Subcategory Input */}
-                <div className="bg-[#2C2C2C] p-4 rounded-lg mb-6">
-                  <p className="text-sm font-semibold text-gray-400 mb-2">
-                    {editingSub.catId === cat._id ? "Editing Subcategory" : "Add Subcategory"}
+                {/* Subcategory Add/Edit Form */}
+                <div className="bg-black/40 rounded-xl p-4 border border-white/10 mb-4">
+                  <p className="text-sm text-gray-400 mb-2 font-medium">
+                    {editingSub.catId === cat._id ? "Edit Subcategory" : "Add Subcategory"}
                   </p>
-                  <div className="flex gap-2 items-center">
+                  <div className="flex flex-wrap gap-2 items-center">
                     <input
                       type="text"
                       placeholder="Subcategory Name"
                       value={editingSub.catId === cat._id ? editingSub.name : subName}
-                      onChange={(e) => {
-                        if (editingSub.catId === cat._id)
-                          setEditingSub({ ...editingSub, name: e.target.value });
-                        else setSubName(e.target.value);
-                      }}
-                      className="p-2 border rounded-lg w-full bg-[#1E1E1E] border-[#3A3A3A] text-white focus:outline-none focus:ring-1 focus:ring-[#FF8C42]"
+                      onChange={(e) =>
+                        editingSub.catId === cat._id
+                          ? setEditingSub({ ...editingSub, name: e.target.value })
+                          : setSubName(e.target.value)
+                      }
+                      className="flex-1 p-2.5 rounded-lg bg-[#121212] border border-[#2b2b2b] text-white focus:ring-1 focus:ring-orange-500 focus:border-orange-400 outline-none"
                     />
+
+                    {/* Fixed Subcategory File Input */}
                     <input
                       type="file"
                       accept="image/*"
-                      onChange={(e) => {
-                        if (editingSub.catId === cat._id)
-                          setEditingSub({ ...editingSub, image: e.target.files[0] });
-                        else setSubImage(e.target.files[0]);
-                      }}
-                      className="text-sm text-gray-400"
+                      onChange={(e) =>
+                        editingSub.catId === cat._id
+                          ? setEditingSub({ ...editingSub, image: e.target.files[0] })
+                          : setSubImage(e.target.files[0])
+                      }
+                      className="file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-500/20 file:text-blue-300 hover:file:bg-blue-500/30 file:cursor-pointer bg-[#121212] border border-[#2b2b2b] text-gray-400 rounded-lg p-1 w-full sm:w-auto"
                     />
+
                     {editingSub.catId === cat._id ? (
                       <>
-                        <button onClick={handleSaveSubcategory} className="bg-green-600 hover:bg-green-700 text-white p-2 rounded-lg"><FaSave /></button>
-                        <button onClick={() => setEditingSub({ catId: null, subId: null, name: "", image: null })} className="bg-gray-600 hover:bg-gray-500 text-white p-2 rounded-lg"><FaTimes /></button>
+                        <button
+                          onClick={handleSaveSubcategory}
+                          className="p-2 bg-green-600 hover:bg-green-500 rounded-lg"
+                        >
+                          <FaSave />
+                        </button>
+                        <button
+                          onClick={() => setEditingSub({ catId: null, subId: null, name: "", image: null })}
+                          className="p-2 bg-gray-700 hover:bg-gray-600 rounded-lg"
+                        >
+                          <FaTimes />
+                        </button>
                       </>
                     ) : (
-                      <button onClick={() => handleAddSubcategory(cat._id)} className="bg-[#3B82F6] hover:bg-[#2563EB] text-white p-2 rounded-lg"><FaPlus /></button>
+                      <button
+                        onClick={() => handleAddSubcategory(cat._id)}
+                        className="p-2 bg-blue-600 hover:bg-blue-500 rounded-lg"
+                      >
+                        <FaPlus />
+                      </button>
                     )}
                   </div>
                 </div>
 
-                {/* Subcategories List */}
-                <h3 className="text-lg font-semibold text-gray-400 mb-3">Subcategories ({cat.subcategories.length})</h3>
-                <div className="flex flex-wrap gap-3 max-h-40 overflow-y-auto custom-scrollbar-dark">
-                  {cat.subcategories.map((sub) => (
-                    <div key={sub._id} className="bg-[#2C2C2C] px-3 py-1.5 rounded-full flex items-center gap-2 text-sm border border-[#3A3A3A]">
-                      {sub.image && (
-                        <img
-                          src={getImageUrl(sub.image)}
-                          alt={sub.name}
-                          className="w-6 h-6 object-cover rounded-full"
-                        />
-                      )}
-                      <span className="text-white capitalize">{sub.name}</span>
-                      <button onClick={() => handleEditSubcategory(cat._id, sub)} className="text-[#EAB308] hover:text-yellow-300"><FaEdit className="w-3 h-3" /></button>
-                      <button onClick={() => handleDeleteSubcategory(cat._id, sub._id)} className="text-red-500 hover:text-red-400"><FaTimes className="w-3 h-3" /></button>
-                    </div>
-                  ))}
-                  {cat.subcategories.length === 0 && <p className="text-gray-500 italic text-sm">No subcategories defined.</p>}
+                {/* Subcategory List */}
+                <div className="flex flex-wrap gap-2 mt-auto max-h-40 overflow-y-auto">
+                  {cat.subcategories.length > 0 ? (
+                    cat.subcategories.map((sub) => (
+                      <div
+                        key={sub._id}
+                        className="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-full text-sm text-gray-300"
+                      >
+                        {sub.image && (
+                          <img
+                            src={getImageUrl(sub.image)}
+                            alt={sub.name}
+                            className="w-5 h-5 rounded-full object-cover"
+                          />
+                        )}
+                        <span className="capitalize">{sub.name}</span>
+                        <button
+                          onClick={() => handleEditSubcategory(cat._id, sub)}
+                          className="text-yellow-400 hover:text-yellow-300"
+                        >
+                          <FaEdit className="w-3 h-3" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteSubcategory(cat._id, sub._id)}
+                          className="text-red-400 hover:text-red-300"
+                        >
+                          <FaTimes className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-gray-500 text-sm italic">No subcategories yet.</p>
+                  )}
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
-
-          {categories.length === 0 && <p className="text-gray-500 mt-16 text-center text-xl">No categories found. Use the form above to get started.</p>}
         </div>
       </div>
     </>

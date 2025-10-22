@@ -5,6 +5,7 @@ import adminImg from '../img/fb.gif';
 import sellerImg from '../img/bird.gif';
 import { FaSearch } from "react-icons/fa";
 import { AuthContext } from '../context/AuthContext';
+import ProfileDropdown from './ProfileDropdown'; // Ensure this import points to your dropdown
 
 const containerVariants = {
   hidden: { opacity: 0, y: 30 },
@@ -70,10 +71,17 @@ const LandingPage = () => {
           : `linear-gradient(to bottom right, rgba(255,255,255,0.7), rgba(255,240,220,0.6)), url(${backgroundImage}) center/cover no-repeat`
       }}
     >
+      {/* Landing Page Backdrop */}
       <div className="absolute inset-0 backdrop-blur-md -z-10"></div>
 
+      {/* Profile Dropdown always on top */}
+      <div className="fixed top-4 right-4 z-50">
+        <ProfileDropdown user={user} logout={() => console.log("Logout")} />
+      </div>
+
+      {/* Hero Section */}
       <motion.div
-        style={styles.hero}
+        style={{ ...styles.hero, zIndex: 10 }}
         initial="hidden"
         animate="visible"
         variants={containerVariants}
@@ -97,13 +105,9 @@ const LandingPage = () => {
           style={isAdmin ? styles.adminSubtext : isSeller ? styles.sellerSubtext : styles.subtext}
         >
           {isAdmin ? (
-            <span className="flex items-center justify-center gap-2">
-             
-            </span>
+            <span></span>
           ) : isSeller ? (
-            <span className="flex items-center justify-center gap-2">
-              Seller Dashboard - Manage Your Products
-            </span>
+            <span>Seller Dashboard - Manage Your Products</span>
           ) : (
             "Find the best products for your home"
           )}
@@ -134,9 +138,9 @@ const LandingPage = () => {
           </motion.form>
         )}
 
-        {/* Search results for normal users */}
+        {/* Search Results */}
         {!isAdmin && !isSeller && (
-          <div className="mt-6">
+          <div className="mt-6 relative z-10">
             {loading && <p className="text-orange-500 font-medium">Searching...</p>}
             {error && <p className="text-red-500">{error}</p>}
 
@@ -195,8 +199,7 @@ const styles = {
     textAlign: 'center',
     maxWidth: '1000px',
     width: '100%',
-    position: 'relative',
-    zIndex: 10
+    position: 'relative'
   },
   heading: {
     fontSize: '3rem',

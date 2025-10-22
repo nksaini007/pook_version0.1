@@ -26,15 +26,15 @@ const Nev = () => {
           <div className="flex justify-between items-center py-3">
             {/* LOGO */}
             <div className="flex items-center gap-3 text-2xl font-bold tracking-wider">
-              <img
+              {/* <img
                 src={img2}
                 alt="Logo"
                 height={40}
                 width={40}
                 className="rounded-full shadow-md"
-              />
+              /> */}
               <span className={`${isAdmin ? "text-orange-400" : "text-gray-800"}`}>
-                mkigns
+               Stinchar
               </span>
             </div>
 
@@ -114,7 +114,7 @@ const Nev = () => {
         } shadow-lg md:hidden z-50`}
       >
         {[
-          { to: "/home", icon: "fa-house", label: "Home" },
+          { to: "/", icon: "fa-house", label: "Home" },
           { to: "/appliances", icon: "fa-blender", label: "Appliances" },
           { to: "/services", icon: "fa-handshake", label: "Services" },
           { to: "/cart", icon: "fa-cart-shopping", label: "Cart" },

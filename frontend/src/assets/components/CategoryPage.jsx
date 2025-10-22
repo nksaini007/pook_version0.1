@@ -125,14 +125,14 @@ const CategoryPage = () => {
               >
                 <Link
                   to={`/category/${categoryName}/${sub.name.toLowerCase()}`}
-                  className="block bg-white/80 backdrop-blur-xl border border-gray-200 rounded-2xl p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                  className="block bg-white/80 backdrop-blur-xl border border-gray-200 rounded-2xl p-2 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
                 >
                   {/* Subcategory Image */}
                   {sub.image && (
                     <img
                       src={getImageUrl(sub.image)}
                       alt={sub.name}
-                      className="w-full h-36 object-cover rounded-xl mb-3"
+                      className="w-full h-36 object-cover rounded-xl "
                     />
                   )}
                   <h3 className="text-lg font-semibold text-gray-800 mb-2 capitalize">
