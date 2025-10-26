@@ -67,14 +67,14 @@ const Categories = () => {
         </div>
 
         {/* Categories Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-1 sm:gap-8">
           {filteredCategories.map((category, index) => (
             <Link
               key={category._id || index}
               to={`/category/${category.name}`}
               className="block group"
             >
-              <div className="bg-white rounded-2xl overflow-hidden shadow-xl border border-gray-100 transition-all duration-500 transform hover:shadow-2xl hover:scale-[1.03] hover:border-orange-400/50 flex flex-col h-full cursor-pointer">
+              <div className="bg-white rounded overflow-hidden shadow-xl border border-gray-100 transition-all duration-500 transform hover:shadow-2xl hover:scale-[1.03] hover:border-orange-400/50 flex flex-col h-full cursor-pointer">
 
                 {/* Full-size Image */}
                 <div className="w-full p-1 h-30 md:h-52 lg:h-40 relative overflow-hidden">
@@ -82,7 +82,7 @@ const Categories = () => {
                     <img
                       src={getImageUrl(category.image)}
                       alt={category.name}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      className="w-full h-full object-cover rounded rounded-3x1 transition-transform duration-700 group-hover:scale-110"
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center bg-gray-100">
