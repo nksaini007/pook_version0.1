@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { FaPlus, FaEdit, FaTrash, FaChartBar, FaImage } from "react-icons/fa";
-import API from "../../api/api"; // your axios instance
+import { FaPlus, FaEdit, FaTrash, FaChartBar, FaImage, FaBoxOpen } from "react-icons/fa";
+import API from "../../api/api"; // Axios instance
 import Nev from "../Nev";
-
+import SellerOrders from "./order/SellerOrders";
+import { useNavigate } from "react-router-dom";
 const SellerDashboard = () => {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -27,8 +28,11 @@ const SellerDashboard = () => {
   });
   const [editing, setEditing] = useState(null);
   const [preview, setPreview] = useState(null);
-
-  // Fetch seller products
+  const navigate = useNavigate();
+  const handleordersClick = () => {
+    navigate('/orders');
+  }
+  // ✅ Fetch seller products
   const fetchProducts = async () => {
     try {
       const { data } = await API.get("/products");
@@ -38,7 +42,7 @@ const SellerDashboard = () => {
     }
   };
 
-  // Fetch categories
+  // ✅ Fetch categories
   const fetchCategories = async () => {
     try {
       const { data } = await API.get("/categories");
@@ -53,6 +57,7 @@ const SellerDashboard = () => {
     fetchCategories();
   }, []);
 
+  // ✅ Form handlers
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleImageChange = (e) => {
@@ -132,16 +137,20 @@ const SellerDashboard = () => {
     <>
       <Nev />
       <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white py-20 px-6">
+        {/* Header */}
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Seller Dashboard</h1>
+          <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
+            <FaBoxOpen className="text-orange-500" /> Seller Dashboard
+          </h1>
           <button className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg px-4 py-2 shadow transition">
             <FaChartBar className="text-xl" />
-            <span className="hidden md:inline">Analytics</span>
+          <button onClick={ handleordersClick}>  <span className="hidden md:inline">orders</span></button>
           </button>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10">
-          {/* Product Form */}
+        {/* Main Grid: Product Management */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+          {/* 🧾 Product Form */}
           <div className="col-span-1 bg-white rounded-2xl shadow-lg p-6 border border-orange-100 overflow-y-auto max-h-[80vh]">
             <h2 className="text-xl font-semibold mb-5 text-orange-700">
               {editing ? "Edit Product" : "Add Product"}
@@ -155,7 +164,7 @@ const SellerDashboard = () => {
                 <input type="number" name="stock" required placeholder="Stock" value={form.stock} onChange={handleChange} className="w-1/2 border border-orange-200 focus:border-orange-500 rounded-lg p-3 outline-none" />
               </div>
 
-              {/* Category dropdown */}
+              {/* Category */}
               <select
                 name="category"
                 value={form.category}
@@ -169,7 +178,7 @@ const SellerDashboard = () => {
                 ))}
               </select>
 
-              {/* Subcategory dropdown */}
+              {/* Subcategory */}
               <select
                 name="subcategory"
                 value={form.subcategory}
@@ -187,17 +196,19 @@ const SellerDashboard = () => {
                     ))}
               </select>
 
-              <input type="text" name="type" placeholder="Type" value={form.type} onChange={handleChange} className="w-full border border-orange-200 focus:border-orange-500 rounded-lg p-3 outline-none" />
-              <input type="text" name="brand" placeholder="Brand" value={form.brand} onChange={handleChange} className="w-full border border-orange-200 focus:border-orange-500 rounded-lg p-3 outline-none" />
-              <input type="text" name="material" placeholder="Material" value={form.material} onChange={handleChange} className="w-full border border-orange-200 focus:border-orange-500 rounded-lg p-3 outline-none" />
-              <input type="text" name="color" placeholder="Color" value={form.color} onChange={handleChange} className="w-full border border-orange-200 focus:border-orange-500 rounded-lg p-3 outline-none" />
-              <input type="text" name="dimensions" placeholder="Dimensions" value={form.dimensions} onChange={handleChange} className="w-full border border-orange-200 focus:border-orange-500 rounded-lg p-3 outline-none" />
-              <input type="text" name="weight" placeholder="Weight" value={form.weight} onChange={handleChange} className="w-full border border-orange-200 focus:border-orange-500 rounded-lg p-3 outline-none" />
-              <input type="text" name="warranty" placeholder="Warranty" value={form.warranty} onChange={handleChange} className="w-full border border-orange-200 focus:border-orange-500 rounded-lg p-3 outline-none" />
-              <input type="text" name="origin" placeholder="Origin" value={form.origin} onChange={handleChange} className="w-full border border-orange-200 focus:border-orange-500 rounded-lg p-3 outline-none" />
-              <input type="text" name="features" placeholder="Features (comma separated)" value={form.features} onChange={handleChange} className="w-full border border-orange-200 focus:border-orange-500 rounded-lg p-3 outline-none" />
-              <textarea name="care_instructions" placeholder="Care Instructions" value={form.care_instructions} onChange={handleChange} className="w-full border border-orange-200 focus:border-orange-500 rounded-lg p-3 outline-none" />
+              {/* Extra Fields */}
+              <input type="text" name="type" placeholder="Type" value={form.type} onChange={handleChange} className="w-full border border-orange-200 rounded-lg p-3 outline-none" />
+              <input type="text" name="brand" placeholder="Brand" value={form.brand} onChange={handleChange} className="w-full border border-orange-200 rounded-lg p-3 outline-none" />
+              <input type="text" name="material" placeholder="Material" value={form.material} onChange={handleChange} className="w-full border border-orange-200 rounded-lg p-3 outline-none" />
+              <input type="text" name="color" placeholder="Color" value={form.color} onChange={handleChange} className="w-full border border-orange-200 rounded-lg p-3 outline-none" />
+              <input type="text" name="dimensions" placeholder="Dimensions" value={form.dimensions} onChange={handleChange} className="w-full border border-orange-200 rounded-lg p-3 outline-none" />
+              <input type="text" name="weight" placeholder="Weight" value={form.weight} onChange={handleChange} className="w-full border border-orange-200 rounded-lg p-3 outline-none" />
+              <input type="text" name="warranty" placeholder="Warranty" value={form.warranty} onChange={handleChange} className="w-full border border-orange-200 rounded-lg p-3 outline-none" />
+              <input type="text" name="origin" placeholder="Origin" value={form.origin} onChange={handleChange} className="w-full border border-orange-200 rounded-lg p-3 outline-none" />
+              <input type="text" name="features" placeholder="Features (comma separated)" value={form.features} onChange={handleChange} className="w-full border border-orange-200 rounded-lg p-3 outline-none" />
+              <textarea name="care_instructions" placeholder="Care Instructions" value={form.care_instructions} onChange={handleChange} className="w-full border border-orange-200 rounded-lg p-3 outline-none" />
 
+              {/* Image Upload */}
               <div className="flex items-center gap-3">
                 <FaImage className="text-orange-500 text-lg" />
                 <input type="file" name="image" accept="image/*" onChange={handleImageChange} className="text-sm" />
@@ -215,7 +226,7 @@ const SellerDashboard = () => {
             </form>
           </div>
 
-          {/* Product List */}
+          {/* 🧾 Product List */}
           <div className="col-span-2">
             <h2 className="text-xl font-semibold mb-6 text-orange-700">Product List</h2>
             {products.length === 0 ? (
@@ -224,7 +235,7 @@ const SellerDashboard = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {products.map((p) => (
                   <div key={p._id} className="flex flex-col sm:flex-row items-center justify-between bg-orange-50 rounded-xl p-4 shadow-sm hover:shadow-md transition">
-                    <div className="flex items-center gap-4 w-full sm:w-auto">
+                    <div className="flex items-center gap-4">
                       <img
                         src={p.images?.[0]?.url ? `http://localhost:5000${p.images[0].url}` : "https://via.placeholder.com/60x60.png?text=No+Image"}
                         alt={p.name}
@@ -235,19 +246,27 @@ const SellerDashboard = () => {
                         <p className="text-sm text-gray-600">{p.category} / {p.subcategory}</p>
                       </div>
                     </div>
-                    <div className="flex flex-col items-end gap-1 text-right mt-3 sm:mt-0 sm:ml-4">
+                    <div className="flex flex-col items-end gap-1 text-right">
                       <span className="text-orange-600 font-semibold text-lg">₹{p.price}</span>
                       <span className="text-gray-700 text-sm">Stock: {p.stock}</span>
                     </div>
                     <div className="flex items-center gap-3 mt-3 sm:mt-0">
-                      <button onClick={() => handleEdit(p)} className="bg-white border border-orange-300 text-orange-600 hover:bg-orange-100 hover:text-orange-700 p-2 rounded-lg transition shadow-sm"><FaEdit /></button>
-                      <button onClick={() => handleDelete(p._id)} className="bg-white border border-red-300 text-red-600 hover:bg-red-100 hover:text-red-700 p-2 rounded-lg transition shadow-sm"><FaTrash /></button>
+                      <button onClick={() => handleEdit(p)} className="bg-white border border-orange-300 text-orange-600 hover:bg-orange-100 p-2 rounded-lg transition shadow-sm"><FaEdit /></button>
+                      <button onClick={() => handleDelete(p._id)} className="bg-white border border-red-300 text-red-600 hover:bg-red-100 p-2 rounded-lg transition shadow-sm"><FaTrash /></button>
                     </div>
                   </div>
                 ))}
               </div>
             )}
           </div>
+        </div>
+
+        {/* 🧾 Seller Orders Section */}
+        <div className="bg-white border border-orange-100 rounded-2xl shadow-lg p-6">
+          <h2 className="text-xl font-semibold mb-4 text-orange-700 flex items-center gap-2">
+            <FaBoxOpen /> Seller Orders
+          </h2>
+       
         </div>
       </div>
     </>

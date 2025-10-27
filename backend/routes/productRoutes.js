@@ -36,6 +36,7 @@ router.get("/public", getProducts);
 
 // ✅ Get single product by ID
 router.get("/:id", getProductById);
+// get all prodct
 
 /* ============================================================
    🔐 Protected Routes (Require Token)

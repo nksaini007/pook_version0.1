@@ -85,25 +85,69 @@ const getSellerOrders = async (req, res) => {
 };
 
 // Update item-level status by seller
+// const updateItemStatus = async (req, res) => {
+//   try {
+//     const { orderId, itemId, status } = req.body;
+
+//     const order = await Order.findById(orderId);
+//     if (!order) return res.status(404).json({ message: "Order not found" });
+
+//     const item = order.orderItems.id(itemId);
+//     if (!item) return res.status(404).json({ message: "Item not found" });
+
+//     if (item.seller._id.toString() !== req.user._id.toString()) {
+//       return res.status(403).json({ message: "Not authorized to update this item" });
+//     }
+
+//     item.itemStatus = status;
+//     await order.save();
+//     res.json({ message: "Item status updated", item });
+//   } catch (error) {
+//     res.status(500).json({ message: error.message });
+//   }
+// };
+// ✅ Update item-level status by seller
 const updateItemStatus = async (req, res) => {
   try {
-    const { orderId, itemId, status } = req.body;
+    const { orderId, productId, status } = req.body;
+
+    if (!orderId || !productId || !status) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
 
     const order = await Order.findById(orderId);
     if (!order) return res.status(404).json({ message: "Order not found" });
 
-    const item = order.orderItems.id(itemId);
-    if (!item) return res.status(404).json({ message: "Item not found" });
+    // Find the item that matches productId
+    const item = order.orderItems.find(
+      (i) => i.product.toString() === productId.toString()
+    );
 
+    if (!item) return res.status(404).json({ message: "Item not found in order" });
+
+    // ✅ Check if logged-in seller owns this item
     if (item.seller._id.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ message: "Not authorized to update this item" });
+      return res.status(403).json({ message: "You are not authorized to update this item" });
     }
 
+    // ✅ Update the item-level status
     item.itemStatus = status;
+
+    // ✅ Optionally, also push a note for audit tracking
+    order.notes.push({
+      message: `Seller updated item '${item.name}' status to '${status}'`,
+      addedBy: "Seller",
+    });
+
     await order.save();
-    res.json({ message: "Item status updated", item });
+
+    res.json({
+      message: `Item status updated to '${status}'`,
+      item,
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Error updating item status:", error);
+    res.status(500).json({ message: "Server error updating item status" });
   }
 };
 
