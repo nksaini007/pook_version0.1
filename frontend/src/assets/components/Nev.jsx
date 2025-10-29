@@ -16,7 +16,7 @@ const Nev = () => {
     <>
       {/* 🌑 NAVBAR */}
       <nav
-        className={`fixed top-0 w-full z-50 transition-colors duration-500 ${
+        className={` top-0 w-full z-50 transition-colors duration-500 ${
           isAdmin
             ? "bg-[#0d0d0d] text-white border-b border-gray-800 shadow-[0_4px_20px_rgba(255,106,0,0.1)]"
             : "bg-white/90 backdrop-blur-md text-gray-800 border-b border-gray-200"
@@ -97,7 +97,9 @@ const Nev = () => {
                     Login
                   </Link>
                 ) : (
+                  
                   <ProfileDropdown user={user} logout={logout} />
+
                 )}
               </div>
             </div>

@@ -262,12 +262,12 @@ const SellerDashboard = () => {
         </div>
 
         {/* 🧾 Seller Orders Section */}
-        <div className="bg-white border border-orange-100 rounded-2xl shadow-lg p-6">
+        {/* <div className="bg-white border border-orange-100 rounded-2xl shadow-lg p-6">
           <h2 className="text-xl font-semibold mb-4 text-orange-700 flex items-center gap-2">
             <FaBoxOpen /> Seller Orders
           </h2>
        
-        </div>
+        </div> */}
       </div>
     </>
   );

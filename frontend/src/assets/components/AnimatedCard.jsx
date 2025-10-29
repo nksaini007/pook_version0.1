@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react';
 import { motion } from 'framer-motion';
-import userImg from '../img/city.jpg';
+import userImg from '../img/g_house.png';
 import adminImg from '../img/fb.gif';
 import sellerImg from '../img/bird.gif';
 import { FaSearch } from "react-icons/fa";
