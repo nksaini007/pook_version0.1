@@ -132,7 +132,7 @@ const AdminCategoryDashboard = () => {
 
   return (
     <>
-      <Nev />
+     
       <div className="min-h-screen bg-gradient-to-br from-[#0d0d0d] via-[#1a1a1a] to-[#0d0d0d] text-gray-200 py-16 px-6 relative overflow-hidden">
         {/* Background Glow */}
         <div className="absolute inset-0 -z-10">

@@ -165,7 +165,7 @@ const Cart = () => {
                       </div>
 
                       <div className="text-center mt-3 font-medium text-gray-600">
-                        Subtotal: ₹{(item.price * item.quantity).toFixed(2)}
+                        Subtotal: ₹{(item.price * item.quantity).toFixed(1)}
                       </div>
                     </div>
                   </div>
