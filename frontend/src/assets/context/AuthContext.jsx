@@ -31,6 +31,8 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("user");
     setUser(null);
     setToken(null);
+        // 👇 optional: remove header for safety updated on 31-10-25
+    delete API.defaults.headers.common["Authorization"];
   };
 
   return (

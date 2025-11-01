@@ -91,6 +91,7 @@ function App() {
           <Route path='/category/:categoryName/:itemName/:itemList/:productId' element={<ProductPage />} />
           <Route path='*' element={<NotFound404 />} />
           <Route path='/orders' element={<SellerOrders />} />
+           <Route path="/product/:id" element={<ProductPage />} />
         </Routes>
 
         {/* ✅ Toastify should be rendered once globally */}
