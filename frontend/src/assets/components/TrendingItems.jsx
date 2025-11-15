@@ -107,7 +107,7 @@ const FocusCarousel = ({ items = cetogry, title = "Trending right now", autoplay
                 }`}
                 aria-current={active ? "true" : "false"}
               >
-                <div className={`rounded-xl overflow-hidden shadow-lg ${active ? "border-2 border-amber-400" : "border"} bg-white`}>
+                <div className={`rounded-xl overflow-hidden shadow-lg ${active ? "border-2 border-amber-400" :"border-0"} bg-white`}>
                   <div className="relative h-56 md:h-64 bg-gray-100">
                     <img
                       src={it.image}

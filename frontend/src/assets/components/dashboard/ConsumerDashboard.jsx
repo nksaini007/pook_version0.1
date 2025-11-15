@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
+import { motion } from "framer-motion";
 import Nev from "../Nev";
 import {
   FaTruck,
@@ -12,32 +13,66 @@ import {
   FaCogs,
   FaSignOutAlt,
   FaList,
+  FaSearch,
+  FaChevronDown,
 } from "react-icons/fa";
 
-// --- Design tokens (keep UI consistent)
+/* --------------------------- Design tokens: Neumorphic Pastel --------------------------- */
 const tokens = {
-  brand: "bg-blue-600",
-  brandText: "text-blue-600",
-  subtle: "text-gray-500",
-  card: "bg-white rounded-xl shadow-sm hover:shadow-md transition",
-  border: "border border-gray-200",
+  bg: "bg-[#f6f8fb]",
+  surface: "bg-white",
+  softBorder: "border border-[#e6e9ef]",
+  shadowSoft: "shadow-[10px_10px_20px_rgba(163,177,198,0.18)] shadow-inner",
+  rounded: "rounded-2xl",
+  accent: "text-[#7c83ff]",
+  subtleText: "text-[#6b7280]",
   pill:
-    "inline-flex items-center gap-2 rounded-full border border-gray-200 px-3 py-1 text-sm",
+    "inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm",
 };
 
-// --- Status helpers
+/* --------------------------- Status helpers --------------------------- */
 const STATUS_META = {
-  pending: { label: "Pending", color: "text-yellow-700", bg: "bg-yellow-50", bar: "bg-yellow-400", icon: <FaClock className="text-yellow-500" /> },
-  shipped: { label: "Shipped", color: "text-blue-700", bg: "bg-blue-50", bar: "bg-blue-500", icon: <FaTruck className="text-blue-500" /> },
-  delivered: { label: "Delivered", color: "text-green-700", bg: "bg-green-50", bar: "bg-green-500", icon: <FaCheckCircle className="text-green-500" /> },
-  cancelled: { label: "Cancelled", color: "text-red-700", bg: "bg-red-50", bar: "bg-red-500", icon: <FaBoxOpen className="text-red-500" /> },
-  unknown: { label: "Unknown", color: "text-gray-700", bg: "bg-gray-50", bar: "bg-gray-400", icon: <FaQuestionCircle className="text-gray-400" /> },
+  pending: {
+    label: "Pending",
+    color: "text-[#f59e0b]",
+    bg: "bg-[#fff7ed]",
+    bar: "bg-[#f59e0b]",
+    icon: <FaClock className="text-[#f59e0b]" />,
+  },
+  shipped: {
+    label: "Shipped",
+    color: "text-[#3b82f6]",
+    bg: "bg-[#eff6ff]",
+    bar: "bg-[#3b82f6]",
+    icon: <FaTruck className="text-[#3b82f6]" />,
+  },
+  delivered: {
+    label: "Delivered",
+    color: "text-[#10b981]",
+    bg: "bg-[#ecfdf5]",
+    bar: "bg-[#10b981]",
+    icon: <FaCheckCircle className="text-[#10b981]" />,
+  },
+  cancelled: {
+    label: "Cancelled",
+    color: "text-[#ef4444]",
+    bg: "bg-[#fff1f2]",
+    bar: "bg-[#ef4444]",
+    icon: <FaBoxOpen className="text-[#ef4444]" />,
+  },
+  unknown: {
+    label: "Unknown",
+    color: "text-[#9ca3af]",
+    bg: "bg-[#f3f4f6]",
+    bar: "bg-[#9ca3af]",
+    icon: <FaQuestionCircle className="text-[#9ca3af]" />,
+  },
 };
 
 const statusProgress = (s) => {
   const v = (s || "unknown").toLowerCase();
-  if (v === "pending") return 25;
-  if (v === "shipped") return 60;
+  if (v === "pending") return 20;
+  if (v === "shipped") return 65;
   if (v === "delivered") return 100;
   if (v === "cancelled") return 0;
   return 40;
@@ -45,36 +80,39 @@ const statusProgress = (s) => {
 
 const statusMeta = (s) => STATUS_META[(s || "unknown").toLowerCase()] || STATUS_META.unknown;
 
+/* --------------------------- Component --------------------------- */
 const ConsumerDashboard = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("orders");
-
-  // UI state
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortBy, setSortBy] = useState("date_desc");
 
   useEffect(() => {
+    let mounted = true;
     const fetchOrders = async () => {
       try {
         const token = localStorage.getItem("token");
         const { data } = await axios.get("http://localhost:5000/api/orders/myorders", {
           headers: { Authorization: `Bearer ${token}` },
         });
+        if (!mounted) return;
         setOrders(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error(err);
+        if (!mounted) return;
         setError("Failed to fetch your orders. Please try again later.");
       } finally {
+        if (!mounted) return;
         setLoading(false);
       }
     };
     fetchOrders();
+    return () => (mounted = false);
   }, []);
 
-  // Derived metrics
   const metrics = useMemo(() => {
     const total = orders.length;
     const delivered = orders.filter((o) => (o.status || "").toLowerCase() === "delivered").length;
@@ -83,14 +121,9 @@ const ConsumerDashboard = () => {
     return { total, delivered, inProgress, spend };
   }, [orders]);
 
-  // Filter + sort + search
   const visibleOrders = useMemo(() => {
     let list = [...orders];
-
-    if (statusFilter !== "all") {
-      list = list.filter((o) => (o.status || "").toLowerCase() === statusFilter);
-    }
-
+    if (statusFilter !== "all") list = list.filter((o) => (o.status || "").toLowerCase() === statusFilter);
     if (query.trim()) {
       const q = query.toLowerCase();
       list = list.filter((o) => {
@@ -113,330 +146,214 @@ const ConsumerDashboard = () => {
     return list;
   }, [orders, query, statusFilter, sortBy]);
 
-  // Action placeholders
-  const handleViewDetails = (orderId) => {
-    // Navigate to order details route if you have one
-    // e.g., navigate(`/orders/${orderId}`)
-    console.log("view details", orderId);
-  };
-  const handleDownloadInvoice = (orderId) => {
-    // Implement invoice download from your API
-    console.log("download invoice", orderId);
-  };
-  const handleReorder = (order) => {
-    // Add items back to cart
-    console.log("reorder", order._id);
-  };
+  /* Action placeholders (adapt to your routing/api) */
+  const handleViewDetails = (orderId) => console.log("view details", orderId);
+  const handleDownloadInvoice = (orderId) => console.log("download invoice", orderId);
+  const handleReorder = (order) => console.log("reorder", order._id);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className={`${tokens.bg} min-h-screen antialiased`}>
       <Nev />
-      <div className="flex flex-col md:flex-row">
-        {/* Sidebar */}
-        <aside className={`w-full md:w-64 ${tokens.card} p-6 md:rounded-none md:shadow-none md:${tokens.border} md:bg-white md:border-r`}>
-          <h2 className="text-xl font-bold text-gray-900 mb-6 text-center md:text-left">Dashboard</h2>
-          <ul className="space-y-2 text-gray-700">
-            {[
-              { key: "orders", label: "My Orders", icon: <FaList /> },
-              { key: "wishlist", label: "Wishlist", icon: <FaHeart /> },
-              { key: "profile", label: "Profile", icon: <FaUser /> },
-              { key: "settings", label: "Settings", icon: <FaCogs /> },
-            ].map((tab) => (
-              <li
-                key={tab.key}
-                className={`flex items-center gap-3 cursor-pointer px-3 py-2 rounded-lg ${
-                  activeTab === tab.key ? "bg-blue-50 " + tokens.brandText + " font-medium" : "hover:bg-gray-100"
-                }`}
-                onClick={() => setActiveTab(tab.key)}
-              >
-                {tab.icon}
-                <span>{tab.label}</span>
-              </li>
-            ))}
-            <li className="flex items-center gap-3 cursor-pointer px-3 py-2 rounded-lg text-red-600 hover:bg-red-50">
-              <FaSignOutAlt />
-              <span>Logout</span>
-            </li>
-          </ul>
-        </aside>
 
-        {/* Main */}
-        <main className="flex-1 p-6 md:p-8 space-y-8">
-          {/* Orders tab */}
-          {activeTab === "orders" && (
-            <>
-              {/* Header */}
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div>
-                  <h1 className="text-2xl font-semibold text-gray-900">My orders</h1>
-                  <p className={tokens.subtle}>Track, manage, and revisit your purchases.</p>
-                </div>
+      <div className="max-w-7xl mx-auto px-6 py-10">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-8">
+          <div>
+            <h1 className="text-3xl font-semibold text-[#111827]">Welcome back</h1>
+            <p className={`${tokens.subtleText} mt-1`}>Your orders & account at a glance — soft, rounded, calm.</p>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className={`${tokens.surface} ${tokens.softBorder} ${tokens.rounded} px-3 py-2 flex items-center gap-3`}>
+              <FaSearch className="text-[#9aa3bf]" />
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search orders or items"
+                className="bg-transparent outline-none text-sm placeholder:text-[#9aa3bf]"
+              />
+            </div>
+
+            <div className={`${tokens.surface} ${tokens.softBorder} ${tokens.rounded} px-3 py-2 flex items-center gap-2`}>
+              <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="bg-transparent outline-none text-sm">
+                <option value="date_desc">Newest</option>
+                <option value="date_asc">Oldest</option>
+                <option value="amount_desc">Amount: High to Low</option>
+                <option value="amount_asc">Amount: Low to High</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* Layout: left sidebar + main */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          {/* Sidebar */}
+          <aside className={`md:col-span-1 ${tokens.surface} ${tokens.softBorder} p-5 ${tokens.rounded} ${tokens.shadowSoft}`}>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-[#fce7f3] to-[#e8f0ff] flex items-center justify-center text-xl">🌸</div>
+              <div>
+                <div className="text-sm font-medium text-[#111827]">Dev Lal</div>
+                <div className="text-xs text-[#9aa3bf]">Seller / Buyer</div>
+              </div>
+            </div>
+
+            <nav className="space-y-2 mt-4">
+              {[{ key: "orders", label: "Orders", icon: <FaList /> }, { key: "wishlist", label: "Wishlist", icon: <FaHeart /> }, { key: "profile", label: "Profile", icon: <FaUser /> }, { key: "settings", label: "Settings", icon: <FaCogs /> }].map((tab) => (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key)}
+                  className={`w-full text-left flex items-center gap-3 px-3 py-2 rounded-lg transition ${activeTab === tab.key ? "bg-[#eef2ff] font-semibold" : "hover:bg-white"}`}
+                >
+                  <span className="text-[#667085]">{tab.icon}</span>
+                  <span className="text-sm text-[#111827]">{tab.label}</span>
+                </button>
+              ))}
+
+              <button className="w-full flex items-center gap-3 px-3 py-2 mt-3 rounded-lg text-sm text-[#ef4444] hover:bg-white">
+                <FaSignOutAlt />
+                Logout
+              </button>
+            </nav>
+
+            <div className="mt-6 text-xs text-[#9aa3bf]">
+              <div>Account settings · Orders · Help</div>
+            </div>
+          </aside>
+
+          {/* Main content */}
+          <main className="md:col-span-3 space-y-6">
+            {/* Metrics */}
+            <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <motion.div whileHover={{ y: -4 }} className={`${tokens.surface} ${tokens.softBorder} p-4 ${tokens.rounded} ${tokens.shadowSoft}`}>
+                <div className="text-xs text-[#9aa3bf]">Total orders</div>
+                <div className="text-2xl font-semibold text-[#111827] mt-1">{metrics.total}</div>
+                <div className="text-xs ${tokens.subtleText} mt-2">Across all time</div>
+              </motion.div>
+
+              <motion.div whileHover={{ y: -4 }} className={`${tokens.surface} ${tokens.softBorder} p-4 ${tokens.rounded} ${tokens.shadowSoft}`}>
+                <div className="text-xs text-[#9aa3bf]">In progress</div>
+                <div className="text-2xl font-semibold text-[#111827] mt-1">{metrics.inProgress}</div>
+                <div className="text-xs ${tokens.subtleText} mt-2">Pending & shipped</div>
+              </motion.div>
+
+              <motion.div whileHover={{ y: -4 }} className={`${tokens.surface} ${tokens.softBorder} p-4 ${tokens.rounded} ${tokens.shadowSoft}`}>
+                <div className="text-xs text-[#9aa3bf]">Spend</div>
+                <div className="text-2xl font-semibold text-[#111827] mt-1">₹{metrics.spend.toFixed(2)}</div>
+                <div className="text-xs ${tokens.subtleText} mt-2">Total purchases</div>
+              </motion.div>
+            </section>
+
+            {/* Filters & controls */}
+            <section className={`${tokens.surface} ${tokens.softBorder} p-4 ${tokens.rounded} ${tokens.shadowSoft}`}>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div className="flex items-center gap-2">
-                  <span className="hidden md:inline-block text-sm text-gray-600">Sort by</span>
-                  <select
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value)}
-                    className="rounded-lg border border-gray-300 px-3 py-2 text-sm bg-white"
-                  >
-                    <option value="date_desc">Newest</option>
-                    <option value="date_asc">Oldest</option>
-                    <option value="amount_desc">Amount: High to Low</option>
-                    <option value="amount_asc">Amount: Low to High</option>
-                  </select>
+                  <div className={`${tokens.pill} bg-[#fff] ${tokens.softBorder}`}>
+                    <span className="text-sm text-[#667085]">Status</span>
+                    <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="bg-transparent outline-none ml-2">
+                      <option value="all">All</option>
+                      <option value="pending">Pending</option>
+                      <option value="shipped">Shipped</option>
+                      <option value="delivered">Delivered</option>
+                      <option value="cancelled">Cancelled</option>
+                    </select>
+                  </div>
+
+                  <div className={`${tokens.pill} bg-[#fff] ${tokens.softBorder}`}>
+                    <span className="text-sm text-[#667085]">Sort</span>
+                    <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="bg-transparent outline-none ml-2">
+                      <option value="date_desc">Newest</option>
+                      <option value="date_asc">Oldest</option>
+                      <option value="amount_desc">Amount desc</option>
+                      <option value="amount_asc">Amount asc</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <button className="px-3 py-2 rounded-lg bg-gradient-to-r from-[#fce7f3] to-[#e8f0ff] text-sm font-semibold">New order</button>
+                  <button className="px-3 py-2 rounded-lg border border-[#e6e9ef] text-sm">Export</button>
                 </div>
               </div>
+            </section>
 
-              {/* Metrics */}
-              <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className={`${tokens.card} p-4`}>
-                  <p className="text-xs uppercase tracking-wide text-gray-500">Total orders</p>
-                  <p className="mt-1 text-2xl font-semibold text-gray-900">{metrics.total}</p>
-                </div>
-                <div className={`${tokens.card} p-4`}>
-                  <p className="text-xs uppercase tracking-wide text-gray-500">In progress</p>
-                  <p className="mt-1 text-2xl font-semibold text-blue-700">{metrics.inProgress}</p>
-                </div>
-                <div className={`${tokens.card} p-4`}>
-                  <p className="text-xs uppercase tracking-wide text-gray-500">Delivered</p>
-                  <p className="mt-1 text-2xl font-semibold text-green-700">{metrics.delivered}</p>
-                </div>
-                <div className={`${tokens.card} p-4`}>
-                  <p className="text-xs uppercase tracking-wide text-gray-500">Total spend</p>
-                  <p className="mt-1 text-2xl font-semibold text-gray-900">₹{metrics.spend.toFixed(2)}</p>
-                </div>
-              </section>
-
-              {/* Controls */}
-              <section className={`${tokens.card} p-4`}>
-                <div className="flex flex-col md:flex-row md:items-center gap-3">
-                  <div className="flex-1">
-                    <input
-                      value={query}
-                      onChange={(e) => setQuery(e.target.value)}
-                      placeholder="Search by order ID or item name"
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
-                    />
-                  </div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    {[
-                      { key: "all", label: "All" },
-                      { key: "pending", label: "Pending" },
-                      { key: "shipped", label: "Shipped" },
-                      { key: "delivered", label: "Delivered" },
-                      { key: "cancelled", label: "Cancelled" },
-                    ].map((f) => {
-                      const active = statusFilter === f.key;
-                      return (
-                        <button
-                          key={f.key}
-                          onClick={() => setStatusFilter(f.key)}
-                          className={`${tokens.pill} ${active ? "bg-blue-50 " + tokens.brandText + " border-blue-200" : "bg-white"} hover:bg-gray-50`}
-                        >
-                          {f.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </section>
-
-              {/* Content */}
+            {/* Orders list */}
+            <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {loading && (
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {[...Array(6)].map((_, i) => (
-                    <div key={i} className={`${tokens.card} p-5 animate-pulse`}>
-                      <div className="h-4 bg-gray-200 rounded w-1/3 mb-4" />
-                      <div className="space-y-2">
-                        <div className="h-3 bg-gray-200 rounded w-1/2" />
-                        <div className="h-3 bg-gray-200 rounded w-2/3" />
-                        <div className="h-3 bg-gray-200 rounded w-1/4" />
-                      </div>
-                      <div className="mt-4 h-2 bg-gray-200 rounded" />
-                    </div>
-                  ))}
-                </div>
+                <div className="col-span-full p-6 ${tokens.surface} ${tokens.softBorder} ${tokens.rounded}">Loading...</div>
               )}
 
               {!loading && error && (
-                <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">
-                  {error}
-                </div>
+                <div className="col-span-full p-4 bg-[#fff7f7] border border-[#fde2e2] rounded">{error}</div>
               )}
 
               {!loading && !error && visibleOrders.length === 0 && (
-                <div className={`${tokens.card} p-8 text-center`}>
-                  <p className="text-gray-800 font-medium">No orders found</p>
-                  <p className={tokens.subtle}>Try adjusting filters or searching by item name.</p>
-                  <div className="mt-4">
-                    <button
-                      onClick={() => {
-                        setQuery("");
-                        setStatusFilter("all");
-                        setSortBy("date_desc");
-                      }}
-                      className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
-                    >
-                      Reset filters
-                    </button>
-                  </div>
-                </div>
+                <div className={`${tokens.surface} p-6 ${tokens.rounded} ${tokens.softBorder} text-center`}>No orders found</div>
               )}
 
-              {!loading && !error && visibleOrders.length > 0 && (
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {visibleOrders.map((order) => {
-                    const meta = statusMeta(order.status);
-                    const progress = statusProgress(order.status);
-                    const created = order.createdAt ? new Date(order.createdAt).toLocaleDateString() : "N/A";
-                    const idShort = order._id?.slice(0, 8) || "—";
+              {!loading && !error && visibleOrders.map((order) => {
+                const meta = statusMeta(order.status);
+                const progress = statusProgress(order.status);
+                const created = order.createdAt ? new Date(order.createdAt).toLocaleDateString() : "N/A";
+                const idShort = order._id?.slice(0, 8) || "—";
 
-                    return (
-                      <div key={order._id} className={`${tokens.card} p-5`}>
-                        {/* Header */}
-                        <div className="flex items-center justify-between mb-3">
-                          <div>
-                            <p className="text-xs text-gray-500">Order</p>
-                            <h3 className="font-semibold text-gray-900 text-sm">#{idShort}</h3>
-                          </div>
-                          <div className={`flex items-center gap-2 ${meta.bg} px-3 py-1 rounded-full`}>
-                            {meta.icon}
-                            <span className={`text-xs font-medium ${meta.color}`}>{meta.label}</span>
-                          </div>
+                return (
+                  <motion.article key={order._id} whileHover={{ y: -6 }} className={`${tokens.surface} ${tokens.softBorder} p-4 ${tokens.rounded} ${tokens.shadowSoft}`}>
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <div className="text-xs text-[#9aa3bf]">Order</div>
+                        <div className="flex items-center gap-3">
+                          <h3 className="font-semibold text-[#111827]">#{idShort}</h3>
+                          <div className={`${meta.bg} px-2 py-0.5 text-xs rounded-full`}>{meta.icon} <span className={`${meta.color} ml-2`}>{meta.label}</span></div>
                         </div>
-
-                        {/* Info */}
-                        <div className="text-sm text-gray-700 space-y-1">
-                          <p><span className="text-gray-500">Date:</span> {created}</p>
-                          <p><span className="text-gray-500">Total:</span> ₹{order.totalPrice || "N/A"}</p>
-                          <p className="flex items-center gap-2">
-                            <span className="text-gray-500">Items:</span>
-                            <span className="text-gray-800">{order.orderItems?.length || 0}</span>
-                          </p>
-                        </div>
-
-                        {/* Items preview */}
-                        <div className="mt-3 space-y-2">
-                          {(order.orderItems || []).slice(0, 3).map((item, idx) => (
-                            <div key={idx} className="flex items-center justify-between">
-                              <div className="flex items-center gap-3">
-                                <div className="h-9 w-9 rounded-md bg-gray-100 overflow-hidden flex items-center justify-center">
-                                  {/* Optional thumbnail: <img src={item.image} alt={item.name} className="h-full w-full object-cover" /> */}
-                                  <span className="text-xs text-gray-500">IMG</span>
-                                </div>
-                                <div className="text-sm">
-                                  <p className="text-gray-900 line-clamp-1">{item.name}</p>
-                                  <p className="text-gray-500">x{item.qty}</p>
-                                </div>
-                              </div>
-                              <div className="text-gray-800 text-sm">₹{item.price || "-"}</div>
-                            </div>
-                          ))}
-                          {order.orderItems?.length > 3 && (
-                            <p className="text-xs text-gray-500">+ {order.orderItems.length - 3} more</p>
-                          )}
-                        </div>
-
-                        {/* Progress */}
-                        <div className="mt-4">
-                          <div className="h-2 w-full bg-gray-200 rounded-full">
-                            <div
-                              className={`h-2 rounded-full ${statusMeta(order.status).bar}`}
-                              style={{ width: `${progress}%` }}
-                            />
-                          </div>
-                          <p className="text-xs text-gray-500 mt-1">Order progress: {progress}%</p>
-                        </div>
-
-                        {/* Actions */}
-                        <div className="mt-4 flex items-center gap-2">
-                          <button
-                            onClick={() => handleViewDetails(order._id)}
-                            className="px-3 py-2 rounded-lg border border-gray-300 text-gray-800 text-sm hover:bg-gray-50"
-                          >
-                            View details
-                          </button>
-                          <button
-                            onClick={() => handleDownloadInvoice(order._id)}
-                            className="px-3 py-2 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-700"
-                          >
-                            Invoice
-                          </button>
-                          {(order.status || "").toLowerCase() === "delivered" && (
-                            <button
-                              onClick={() => handleReorder(order)}
-                              className="px-3 py-2 rounded-lg bg-gray-900 text-white text-sm hover:bg-black"
-                            >
-                              Reorder
-                            </button>
-                          )}
-                        </div>
+                        <div className="text-xs text-[#9aa3bf] mt-1">{created}</div>
                       </div>
-                    );
-                  })}
-                </div>
-              )}
-            </>
-          )}
 
-          {/* Wishlist tab */}
-          {activeTab === "wishlist" && (
-            <section className={`${tokens.card} p-8 text-center`}>
-              <h2 className="text-lg font-semibold text-gray-900">Wishlist</h2>
-              <p className={tokens.subtle}>Your saved items will appear here.</p>
-            </section>
-          )}
+                      <div className="text-right">
+                        <div className="text-sm font-semibold text-[#111827]">₹{order.totalPrice || "0.00"}</div>
+                        <div className="text-xs text-[#9aa3bf]">{order.orderItems?.length || 0} items</div>
+                      </div>
+                    </div>
 
-          {/* Profile tab */}
-          {activeTab === "profile" && (
-            <section className={`${tokens.card} p-6`}>
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Profile</h2>
-              <div className="grid sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm text-gray-600 mb-1">Full name</label>
-                  <input className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm bg-white" placeholder="Your name" />
-                </div>
-                <div>
-                  <label className="block text-sm text-gray-600 mb-1">Email</label>
-                  <input className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm bg-white" placeholder="you@example.com" />
-                </div>
-                <div>
-                  <label className="block text-sm text-gray-600 mb-1">Phone</label>
-                  <input className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm bg-white" placeholder="+91-" />
-                </div>
-                <div>
-                  <label className="block text-sm text-gray-600 mb-1">Address</label>
-                  <input className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm bg-white" placeholder="Street, City, State" />
-                </div>
-              </div>
-              <div className="mt-4">
-                <button className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Save changes</button>
-              </div>
-            </section>
-          )}
+                    <div className="mt-3 space-y-2">
+                      {(order.orderItems || []).slice(0,3).map((it, i) => (
+                        <div key={i} className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-lg bg-[#fbfbfe] flex items-center justify-center text-xs text-[#9aa3bf]">IMG</div>
+                            <div>
+                              <div className="text-sm text-[#111827] line-clamp-1">{it.name}</div>
+                              <div className="text-xs text-[#9aa3bf]">Qty: {it.qty}</div>
+                            </div>
+                          </div>
+                          <div className="text-sm text-[#111827]">₹{it.price || "-"}</div>
+                        </div>
+                      ))}
 
-          {/* Settings tab */}
-          {activeTab === "settings" && (
-            <section className={`${tokens.card} p-6`}>
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Settings</h2>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-900">Notifications</p>
-                    <p className="text-xs text-gray-500">Get updates on order status and offers.</p>
-                  </div>
-                  <input type="checkbox" className="h-5 w-5" defaultChecked />
-                </div>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-900">Dark mode</p>
-                    <p className="text-xs text-gray-500">Reduce eye strain at night.</p>
-                  </div>
-                  <input type="checkbox" className="h-5 w-5" />
-                </div>
-              </div>
+                      {order.orderItems?.length > 3 && <div className="text-xs text-[#9aa3bf]">+{order.orderItems.length - 3} more</div>}
+
+                      <div className="mt-2">
+                        <div className="h-2 w-full bg-[#f1f5f9] rounded-full overflow-hidden">
+                          <div className={`${meta.bar} h-2 rounded-full`} style={{ width: `${progress}%` }} />
+                        </div>
+                        <div className="text-xs text-[#9aa3bf] mt-1">Order progress: {progress}%</div>
+                      </div>
+
+                      <div className="mt-3 flex items-center gap-2">
+                        <button onClick={() => handleViewDetails(order._id)} className="px-3 py-2 rounded-lg border border-[#e6e9ef] text-sm">Details</button>
+                        <button onClick={() => handleDownloadInvoice(order._id)} className="px-3 py-2 rounded-lg bg-gradient-to-r from-[#fce7f3] to-[#e8f0ff] text-sm font-semibold">Invoice</button>
+                        {(order.status || "").toLowerCase() === "delivered" && (
+                          <button onClick={() => handleReorder(order)} className="px-3 py-2 rounded-lg bg-[#111827] text-white text-sm">Reorder</button>
+                        )}
+                      </div>
+                    </div>
+                  </motion.article>
+                );
+              })}
             </section>
-          )}
-        </main>
+
+            {/* Footer note */}
+            <div className="text-xs text-[#9aa3bf]">Tip: Click an order to view more details or download invoice.</div>
+          </main>
+        </div>
       </div>
     </div>
   );

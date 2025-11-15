@@ -3,14 +3,7 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 import { FaBoxes, FaSearch } from "react-icons/fa";
 
-/**
- * Different style:
- * - Split layout with a compact left sidebar (filters, quick jump)
- * - Right side uses elegant cards with tall aspect, pinned title, and soft shadows
- * - Sticky sidebar on desktop, fluid on mobile
- * - Subcategory chips with overflow counter
- * - Clean, professional typography and spacing
- */
+
 
 const getImageUrl = (img) => {
   if (!img) return null;
