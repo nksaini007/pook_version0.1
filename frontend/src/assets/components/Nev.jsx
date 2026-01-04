@@ -5,7 +5,7 @@ import { AuthContext } from "../context/AuthContext";
 import ProfileDropdown from "./ProfileDropdown";
 import img2 from "../img/homewobg1.png";
 import "@fortawesome/fontawesome-free/css/all.min.css";
-
+import logo from "../img/logo.jpg";
 const Nev = () => {
   const { user, logout } = useContext(AuthContext);
   const links = ["Home", "Appliances", "RawMaterials", "Services", "Contact"];
@@ -26,16 +26,12 @@ const Nev = () => {
           <div className="flex justify-between items-center py-3">
             {/* LOGO */}
             <div className="flex items-center gap-3 text-2xl font-bold tracking-wider">
-              {/* <img
-                src={img2}
-                alt="Logo"
-                height={40}
-                width={40}
-                className="rounded-full shadow-md"
-              /> */}
+             
               <span className={`${isAdmin ? "text-orange-400" : "text-gray-800"}`}>
+               
                Stinchar
               </span>
+               <img src={logo} alt="" height={50} width={50}/>
             </div>
 
             {/* DESKTOP NAV LINKS */}
@@ -57,10 +53,10 @@ const Nev = () => {
                         `px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 ${
                           isActive
                             ? isAdmin
-                              ? "bg-orange-500 text-white shadow-md"
-                              : "bg-orange-500 text-white"
+                              ? "bg-gray-200 text-white shadow-md"
+                              : "bg-gray-500 text-white"
                             : isAdmin
-                            ? "text-gray-300 hover:bg-gray-800 hover:text-orange-400"
+                            ? "text-gray-300 hover:bg-gray-200 hover:text-gray-100"
                             : "text-gray-700 hover:bg-white/50 hover:text-gray-900"
                         }`
                       }

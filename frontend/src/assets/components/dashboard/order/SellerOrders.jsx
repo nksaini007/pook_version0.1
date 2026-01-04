@@ -832,9 +832,9 @@ const SellerOrders = () => {
 
                   <div className="mt-4 space-y-4">
                     {(selectedOrder.orderItems || []).map((it, i) => (
-                      <div key={i} className="flex items-center justify-between gap-3 p-3 rounded-lg border bg-gray-50">
+                      <div key={i} className="flex items-center justify-between gap-3 p-3 rounded-lg  bg-gray-200">
                         <div className="flex items-center gap-3">
-                          <img src={it.image || "/placeholder.png"} alt={it.name} className="w-14 h-14 rounded-md object-cover border" />
+                          <img src={it.image || "/placeholder.png"} alt={it.name} className="w-14 h-14 rounded-md object-cover " />
                           <div>
                             <p className="text-sm font-medium text-slate-800">{it.name}</p>
                             <p className="text-xs text-slate-500">Qty: {it.qty}</p>
@@ -848,7 +848,7 @@ const SellerOrders = () => {
                       </div>
                     ))}
 
-                    <div className="pt-3 border-t flex items-center justify-between">
+                    <div className="pt-3  flex items-center justify-between">
                       <div className="text-sm text-slate-600">
                         <div>Shipping: {selectedOrder.shippingAddress?.city}, {selectedOrder.shippingAddress?.country}</div>
                         <div className="mt-1">Buyer: {selectedOrder.user?.name || "—"}</div>
@@ -866,9 +866,9 @@ const SellerOrders = () => {
                           // sample: download invoice placeholder
                           toast.info("Invoice download not implemented in demo");
                         }}
-                        className="px-4 py-2 rounded-lg border text-sm hover:bg-gray-50"
+                        className="px-4 py-2 rounded-lg  text-sm hover:bg-gray-100"
                       >
-                        Download Invoice
+                        Download Invoice.
                       </button>
                       <button
                         onClick={() => {

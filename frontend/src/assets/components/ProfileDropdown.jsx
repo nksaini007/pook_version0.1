@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaUser, FaShoppingCart, FaSignOutAlt, FaTachometerAlt } from "react-icons/fa";
-import img from "../img/cat.gif";
+import img from "../img/admin.jpg";
 
 const ProfileDropdown = ({ user, logout }) => {
   const [open, setOpen] = useState(false);
@@ -31,7 +31,7 @@ const ProfileDropdown = ({ user, logout }) => {
       <img
         src={user?.profile || img}
         alt="Profile"
-        className="w-12 h-12 rounded-full border-2 border-green-500 shadow-lg cursor-pointer hover:scale-110 transition-transform duration-200"
+        className="w-12 h-12 rounded-full border-2 shadow-lg cursor-pointer hover:scale-110 transition-transform duration-200"
         onClick={() => setOpen(!open)}
       />
 
